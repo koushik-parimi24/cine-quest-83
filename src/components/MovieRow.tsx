@@ -42,15 +42,16 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
         {/* Movies */}
         <div 
           ref={scrollRef}
-          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide px-3 sm:px-4 lg:px-8 pb-4 snap-x snap-mandatory touch-pan-x"
+          className="flex gap-3 sm:gap-4 overflow-x-scroll scrollbar-hide px-3 sm:px-4 lg:px-8 pb-4"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch'
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'auto'
           }}
         >
           {movies.map((movie) => (
-            <div key={movie.id} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px] snap-start">
+            <div key={movie.id} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]">
               <MovieCard movie={movie} mediaType={mediaType} />
             </div>
           ))}

@@ -27,25 +27,27 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
 
   return (
     <div 
-      className="group relative w-full cursor-pointer transition-all duration-300 hover:scale-105 touch-manipulation"
+      className="group relative w-full cursor-pointer touch-manipulation"
       onClick={() => navigate(`/${mediaType}/${movie.id}`)}
+      style={{ willChange: 'transform' }}
     >
       {/* Poster */}
-      <div className="relative overflow-hidden rounded-lg shadow-[var(--shadow-card)]">
+      <div className="relative overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition-transform duration-200 md:hover:scale-105">
         <img
           src={getImageUrl(movie.poster_path, 'w500')}
           alt={title}
           className="w-full aspect-[2/3] object-cover"
           loading="lazy"
+          decoding="async"
         />
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-[var(--gradient-card)] opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Gradient Overlay - Desktop only */}
+        <div className="absolute inset-0 bg-[var(--gradient-card)] opacity-0 md:group-hover:opacity-100 transition-opacity duration-200" />
         
-        {/* Hover Actions - Hidden on mobile, visible on desktop hover */}
-        <div className="absolute inset-0 hidden md:flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+        {/* Hover Actions - Desktop only */}
+        <div className="absolute inset-0 hidden md:flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
-            className="p-3 rounded-full bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-110"
+            className="p-3 rounded-full bg-[var(--gradient-primary)] transition-shadow hover:shadow-[var(--shadow-glow-bright)]"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/${mediaType}/${movie.id}`);
@@ -54,7 +56,7 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
             <Play className="h-5 w-5 fill-current" />
           </button>
           <button 
-            className="p-3 rounded-full bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] transition-all hover:scale-110"
+            className="p-3 rounded-full bg-[var(--gradient-secondary)] transition-shadow hover:shadow-[var(--shadow-glow)]"
             onClick={handleWatchLater}
           >
             {isInWatchLater ? (

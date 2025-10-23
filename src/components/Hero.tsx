@@ -28,6 +28,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: `url(${getBackdropUrl(movie.backdrop_path)})`,
+          willChange: 'auto'
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
