@@ -71,7 +71,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
           <Button
             variant="outline"
             onClick={() => navigate('/watch-later')}
-            className="gap-2 border-border/50 hover:border-accent hover:text-accent"
+            className="gap-2 border-accent/50 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
           >
             <Bookmark className="h-4 w-4" />
             <span className="hidden lg:inline">Watch Later</span>

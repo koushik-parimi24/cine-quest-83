@@ -17,9 +17,9 @@ All colors MUST be HSL.
     --popover: 220 18% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 345 85% 55%;
+    --primary: 350 95% 65%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 280 75% 60%;
+    --primary-glow: 285 85% 70%;
 
     --secondary: 220 18% 15%;
     --secondary-foreground: 0 0% 98%;
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 220 15% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 195 100% 50%;
+    --accent: 195 100% 60%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 85% 60%;
@@ -35,17 +35,19 @@ All colors MUST be HSL.
 
     --border: 220 18% 18%;
     --input: 220 18% 18%;
-    --ring: 345 85% 55%;
+    --ring: 350 95% 65%;
 
     --radius: 0.75rem;
 
-    /* Cinematic gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(345 85% 55%), hsl(280 75% 60%));
+    /* Brighter vibrant gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(350 95% 65%), hsl(285 85% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(195 100% 60%), hsl(240 85% 70%));
     --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(220 20% 7%) 100%);
     --gradient-card: linear-gradient(180deg, transparent 0%, hsl(220 18% 10% / 0.95) 100%);
 
-    /* Shadows */
-    --shadow-glow: 0 0 40px hsl(345 85% 55% / 0.3);
+    /* Enhanced shadows */
+    --shadow-glow: 0 0 50px hsl(350 95% 65% / 0.5);
+    --shadow-glow-bright: 0 0 60px hsl(350 95% 65% / 0.7);
     --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.5);
 
     /* Animations */

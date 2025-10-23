@@ -67,19 +67,19 @@ const Home = () => {
       </div>
 
       {/* Media Type Toggle */}
-      <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             onClick={() => setMediaType('movie')}
             variant={mediaType === 'movie' ? 'default' : 'outline'}
-            className={mediaType === 'movie' ? 'bg-[var(--gradient-primary)]' : ''}
+            className={mediaType === 'movie' ? 'bg-[var(--gradient-primary)] shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105' : 'touch-manipulation'}
           >
             Movies
           </Button>
           <Button
             onClick={() => setMediaType('tv')}
             variant={mediaType === 'tv' ? 'default' : 'outline'}
-            className={mediaType === 'tv' ? 'bg-[var(--gradient-primary)]' : ''}
+            className={mediaType === 'tv' ? 'bg-[var(--gradient-primary)] shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105' : 'touch-manipulation'}
           >
             TV Shows
           </Button>

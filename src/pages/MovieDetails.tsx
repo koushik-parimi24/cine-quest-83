@@ -180,24 +180,24 @@ const MovieDetails = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 {trailer && (
                   <Button
                     size="lg"
-                    className="bg-[var(--gradient-primary)] hover:opacity-90 shadow-[var(--shadow-glow)]"
+                    className="bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105 touch-manipulation"
                     onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
                   >
-                    <Play className="mr-2 h-5 w-5 fill-current" />
+                    <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                     Watch Trailer
                   </Button>
                 )}
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-border/50 hover:border-accent hover:text-accent"
+                  className="border-accent/50 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
                   onClick={handleWatchLater}
                 >
-                  {isInWatchLater ? <Check className="mr-2 h-5 w-5" /> : <Plus className="mr-2 h-5 w-5" />}
+                  {isInWatchLater ? <Check className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> : <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />}
                   {isInWatchLater ? 'In Watch Later' : 'Add to Watch Later'}
                 </Button>
               </div>

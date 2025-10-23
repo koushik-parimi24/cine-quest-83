@@ -27,7 +27,7 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
 
   return (
     <div 
-      className="group relative flex-shrink-0 w-[200px] cursor-pointer transition-all duration-300 hover:scale-105"
+      className="group relative w-full cursor-pointer transition-all duration-300 hover:scale-105 touch-manipulation"
       onClick={() => navigate(`/${mediaType}/${movie.id}`)}
     >
       {/* Poster */}
@@ -35,17 +35,17 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
         <img
           src={getImageUrl(movie.poster_path, 'w500')}
           alt={title}
-          className="w-full h-[300px] object-cover"
+          className="w-full aspect-[2/3] object-cover"
           loading="lazy"
         />
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-[var(--gradient-card)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-[var(--gradient-card)] opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
         
-        {/* Hover Actions */}
-        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+        {/* Hover Actions - Hidden on mobile, visible on desktop hover */}
+        <div className="absolute inset-0 hidden md:flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
           <button 
-            className="p-3 rounded-full bg-primary/90 hover:bg-primary transition-all hover:scale-110"
+            className="p-3 rounded-full bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-110"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/${mediaType}/${movie.id}`);
@@ -54,7 +54,7 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
             <Play className="h-5 w-5 fill-current" />
           </button>
           <button 
-            className="p-3 rounded-full bg-secondary/90 hover:bg-secondary transition-all hover:scale-110"
+            className="p-3 rounded-full bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] transition-all hover:scale-110"
             onClick={handleWatchLater}
           >
             {isInWatchLater ? (
@@ -73,10 +73,10 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
       </div>
 
       {/* Title */}
-      <h3 className="mt-3 font-semibold text-sm line-clamp-2 px-1">
+      <h3 className="mt-2 font-semibold text-sm line-clamp-2">
         {title}
       </h3>
-      <p className="text-xs text-muted-foreground px-1 mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         {movie.release_date?.split('-')[0] || movie.first_air_date?.split('-')[0]}
       </p>
     </div>

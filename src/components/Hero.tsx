@@ -61,31 +61,30 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4 pt-4">
               <Button 
                 size="lg"
-                className="bg-[var(--gradient-primary)] hover:opacity-90 font-bold shadow-[var(--shadow-glow)]"
+                className="bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] font-bold transition-all hover:scale-105 touch-manipulation"
                 onClick={() => navigate(`/${mediaType}/${movie.id}`)}
               >
-                <Play className="mr-2 h-5 w-5 fill-current" />
+                <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                 Watch Now
               </Button>
               <Button 
                 size="lg"
-                variant="secondary"
-                className="bg-secondary/50 backdrop-blur-sm hover:bg-secondary/70"
+                className="bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] font-bold transition-all hover:scale-105 touch-manipulation"
                 onClick={() => navigate(`/${mediaType}/${movie.id}`)}
               >
-                <Info className="mr-2 h-5 w-5" />
+                <Info className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 More Info
               </Button>
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-border/50 backdrop-blur-sm hover:border-accent hover:text-accent"
+                className="border-accent/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
                 onClick={handleWatchLater}
               >
-                <Plus className="mr-2 h-5 w-5" />
+                <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 {isInWatchLater ? 'Remove' : 'Watch Later'}
               </Button>
             </div>

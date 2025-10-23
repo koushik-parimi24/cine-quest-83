@@ -34,14 +34,14 @@ const WatchLater = () => {
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
 
-      <div className="container mx-auto px-4 lg:px-8 pt-32 pb-12">
-        <div className="flex items-center gap-4 mb-8">
-          <Bookmark className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold">Watch Later</h1>
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-32 pb-12">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <Bookmark className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Watch Later</h1>
         </div>
 
         {movies.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {movies.map((movie) => (
               <MovieCard 
                 key={movie.id} 
