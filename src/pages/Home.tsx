@@ -12,6 +12,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [mediaType, setMediaType] = useState<MediaType>('movie');
   const [heroMovie, setHeroMovie] = useState<Movie | null>(null);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [trending, setTrending] = useState<Movie[]>([]);
   const [popular, setPopular] = useState<Movie[]>([]);
   const [topRated, setTopRated] = useState<Movie[]>([]);
@@ -20,6 +21,17 @@ const Home = () => {
   useEffect(() => {
     loadContent();
   }, [mediaType]);
+
+  // Auto-rotate hero section every 3 seconds
+  useEffect(() => {
+    if (trending.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % Math.min(trending.length, 5));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [trending]);
 
   const loadContent = async () => {
     setLoading(true);
@@ -34,9 +46,10 @@ const Home = () => {
       setPopular(popularRes.results || []);
       setTopRated(topRatedRes.results || []);
       
-      // Set hero movie from trending
+      // Set hero movie from trending - start with first
       if (trendingRes.results && trendingRes.results.length > 0) {
         setHeroMovie(trendingRes.results[0]);
+        setHeroIndex(0);
       }
     } catch (error) {
       console.error('Error loading content:', error);
@@ -61,9 +74,15 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
 
-      {/* Hero Section */}
+      {/* Hero Section with rotation */}
       <div className="pt-16">
-        {heroMovie && <Hero movie={heroMovie} mediaType={mediaType} />}
+        {trending.length > 0 && (
+          <Hero 
+            key={trending[heroIndex]?.id} 
+            movie={trending[heroIndex]} 
+            mediaType={mediaType} 
+          />
+        )}
       </div>
 
       {/* Media Type Toggle */}

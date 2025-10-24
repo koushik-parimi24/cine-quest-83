@@ -39,7 +39,7 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
           <ChevronLeft className="h-8 w-8" />
         </button>
 
-        {/* Movies */}
+        {/* Movies with staggered animations */}
         <div 
           ref={scrollRef}
           className="flex gap-3 sm:gap-4 overflow-x-scroll scrollbar-hide px-3 sm:px-4 lg:px-8 pb-4"
@@ -50,8 +50,15 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
             scrollBehavior: 'auto'
           }}
         >
-          {movies.map((movie) => (
-            <div key={movie.id} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]">
+          {movies.map((movie, index) => (
+            <div 
+              key={movie.id} 
+              className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px] animate-slide-up"
+              style={{ 
+                animationDelay: `${index * 0.05}s`,
+                animationDuration: '0.4s'
+              }}
+            >
               <MovieCard movie={movie} mediaType={mediaType} />
             </div>
           ))}

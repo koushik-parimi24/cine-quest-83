@@ -22,23 +22,24 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
   };
 
   return (
-    <div className="relative h-[85vh] w-full overflow-hidden">
-      {/* Background Image with Gradient Overlay */}
+    <div className="relative h-[85vh] w-full overflow-hidden animate-fade-in">
+      {/* Background Image with Gradient Overlay and Animation */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-scale-in"
         style={{ 
           backgroundImage: `url(${getBackdropUrl(movie.backdrop_path)})`,
-          willChange: 'auto'
+          willChange: 'transform',
+          animationDuration: '0.8s'
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        <div className="absolute inset-0 bg-[var(--gradient-hero)]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent animate-fade-in" />
+        <div className="absolute inset-0 bg-[var(--gradient-hero)] animate-fade-in" style={{ animationDelay: '0.2s' }} />
       </div>
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-2xl space-y-6 animate-fade-in">
+          <div className="max-w-2xl space-y-6 animate-slide-up" style={{ animationDelay: '0.3s', animationDuration: '0.6s' }}>
             {/* Title */}
             <h1 className="text-5xl font-black leading-tight lg:text-7xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               {title}
