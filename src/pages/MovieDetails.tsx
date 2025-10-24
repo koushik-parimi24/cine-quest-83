@@ -271,7 +271,7 @@ const MovieDetails = () => {
                   onClick={() => setShowPlayer(!showPlayer)}
                 >
                   <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
-                  {showPlayer ? 'Hide Player' : 'Watch Now'}
+                  Watch Now
                 </Button>
                 {trailer && (
                   <Button
@@ -298,25 +298,27 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {/* Video Player Section */}
+      {/* Server & Episode Selection Section */}
       {showPlayer && (
         <div className="container mx-auto px-4 lg:px-8 py-8 animate-fade-in">
           <div className="bg-card rounded-lg border border-border overflow-hidden">
             {/* Server Selection */}
-            <div className="p-4 border-b border-border bg-muted/50">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm font-semibold text-muted-foreground">Server:</span>
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-semibold mb-4">Choose Streaming Server</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {Object.entries(streamingServers).map(([key, server]) => (
                   <button
                     key={key}
-                    onClick={() => setSelectedServer(key)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedServer === key
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                    }`}
+                    onClick={() => {
+                      setSelectedServer(key);
+                      window.open(getCurrentStreamUrl(), '_blank');
+                    }}
+                    className="p-4 rounded-lg border-2 transition-all hover:scale-105 bg-secondary hover:bg-secondary/80 border-border hover:border-primary group"
                   >
-                    {server.name} <span className="text-xs opacity-70">({server.quality})</span>
+                    <div className="text-center">
+                      <div className="font-bold text-lg mb-1 group-hover:text-primary">{server.name}</div>
+                      <div className="text-xs text-muted-foreground">{server.quality} Quality</div>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -324,15 +326,16 @@ const MovieDetails = () => {
 
             {/* Season & Episode Selection for TV Shows */}
             {mediaType === 'tv' && details?.seasons && (
-              <div className="p-4 border-b border-border bg-muted/30">
-                <div className="flex flex-col sm:flex-row gap-4">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Select Episode</h3>
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
                   {/* Season Selector */}
-                  <div className="flex-1">
+                  <div>
                     <label className="text-sm font-semibold text-muted-foreground mb-2 block">Season:</label>
                     <select
                       value={selectedSeason}
                       onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
-                      className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-3 rounded-lg bg-background border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       {details.seasons
                         .filter((s: any) => s.season_number > 0)
@@ -345,13 +348,13 @@ const MovieDetails = () => {
                   </div>
 
                   {/* Episode Selector */}
-                  <div className="flex-1">
+                  <div>
                     <label className="text-sm font-semibold text-muted-foreground mb-2 block">Episode:</label>
                     <select
                       value={selectedEpisode}
                       onChange={(e) => setSelectedEpisode(parseInt(e.target.value))}
                       disabled={loadingSeason}
-                      className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                      className="w-full px-4 py-3 rounded-lg bg-background border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-50"
                     >
                       {seasonData?.episodes ? (
                         seasonData.episodes.map((ep: any) => (
@@ -365,18 +368,31 @@ const MovieDetails = () => {
                     </select>
                   </div>
                 </div>
+                
+                <Button
+                  onClick={() => window.open(getCurrentStreamUrl(), '_blank')}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  size="lg"
+                >
+                  <Play className="mr-2 h-5 w-5 fill-current" />
+                  Open Selected Episode
+                </Button>
               </div>
             )}
 
-            {/* Player */}
-            <div className="relative aspect-video bg-black">
-              <iframe
-                src={getCurrentStreamUrl()}
-                className="absolute inset-0 w-full h-full"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
-            </div>
+            {/* For Movies - Direct Open Button */}
+            {mediaType === 'movie' && (
+              <div className="p-6">
+                <Button
+                  onClick={() => window.open(getCurrentStreamUrl(), '_blank')}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  size="lg"
+                >
+                  <Play className="mr-2 h-5 w-5 fill-current" />
+                  Open in {streamingServers[selectedServer as keyof typeof streamingServers].name}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
