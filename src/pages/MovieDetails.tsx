@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { MovieRow } from '@/components/MovieRow';
 import { Play, Plus, Check, ArrowLeft, DollarSign, Calendar, Clock, Star } from 'lucide-react';
 import { watchLaterService } from '@/lib/watchLater';
+import { watchHistory } from '@/lib/watchHistory';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -144,6 +145,30 @@ const MovieDetails = () => {
     return server.url(id!, mediaType, selectedSeason, selectedEpisode);
   };
 
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+
+  const addToHistory = (progress?: number) => {
+    if (!details) return;
+    // store the movie/tv in watch history with timestamp and optional progress
+    try {
+      watchHistory.add(details as any, mediaType, progress);
+    } catch (e) {
+      // ignore storage errors
+      console.warn('Failed to write watch history', e);
+    }
+  };
+
+  // update streamUrl when selection changes
+  useEffect(() => {
+    if (!showPlayer) return;
+    try {
+      const url = getCurrentStreamUrl();
+      setStreamUrl(url);
+    } catch (e) {
+      setStreamUrl(null);
+    }
+  }, [selectedServer, selectedSeason, selectedEpisode, id, mediaType, showPlayer]);
+
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}&type=${mediaType}`);
   };
@@ -268,7 +293,7 @@ const MovieDetails = () => {
                 <Button
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105 touch-manipulation font-bold"
-                  onClick={() => setShowPlayer(!showPlayer)}
+                  onClick={() => { if (!showPlayer) { try { addToHistory(); } catch {} } setShowPlayer(!showPlayer); }}
                 >
                   <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                   Watch Now
@@ -310,10 +335,17 @@ const MovieDetails = () => {
                   <button
                     key={key}
                     onClick={() => {
+                      // set the server and load in-page player (iframe)
                       setSelectedServer(key);
-                      window.open(getCurrentStreamUrl(), '_blank');
+                      // record to continue-watching history
+                      try { addToHistory(); } catch {}
+                      // ensure player area is shown
+                      setShowPlayer(true);
                     }}
-                    className="p-4 rounded-lg border-2 transition-all hover:scale-105 bg-secondary hover:bg-secondary/80 border-border hover:border-primary group"
+                    className={
+                      `p-4 rounded-lg border-2 transition-all hover:scale-105 bg-secondary hover:bg-secondary/80 border-border hover:border-primary group " +
+                      (selectedServer === key ? ' ring-2 ring-primary' : '')`
+                    }
                   >
                     <div className="text-center">
                       <div className="font-bold text-lg mb-1 group-hover:text-primary">{server.name}</div>
@@ -370,7 +402,7 @@ const MovieDetails = () => {
                 </div>
                 
                 <Button
-                  onClick={() => window.open(getCurrentStreamUrl(), '_blank')}
+                  onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                   size="lg"
                 >
@@ -383,14 +415,58 @@ const MovieDetails = () => {
             {/* For Movies - Direct Open Button */}
             {mediaType === 'movie' && (
               <div className="p-6">
-                <Button
-                  onClick={() => window.open(getCurrentStreamUrl(), '_blank')}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  size="lg"
-                >
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                  Open in {streamingServers[selectedServer as keyof typeof streamingServers].name}
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => { try { addToHistory(); } catch {} setShowPlayer(true); }}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    size="lg"
+                  >
+                    <Play className="mr-2 h-5 w-5 fill-current" />
+                    Play Inline
+                  </Button>
+
+                  <Button
+                    onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}
+                    className="w-full bg-secondary text-foreground hover:bg-secondary/90"
+                    size="sm"
+                  >
+                    Open in {streamingServers[selectedServer as keyof typeof streamingServers].name}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Inline player iframe (attempt to embed without sandbox). If server disallows embedding, user can open in new tab using the button above. */}
+      {showPlayer && (
+        <div className="container mx-auto px-4 lg:px-8 py-6">
+          <div className="bg-card rounded-lg border border-border overflow-hidden p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Player</h3>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}>Open in new tab</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowPlayer(false)}>Close</Button>
+              </div>
+            </div>
+            {streamUrl ? (
+              <div className="w-full aspect-video bg-black rounded-md overflow-hidden">
+                <iframe
+                  title="Inline player"
+                  src={streamUrl}
+                  className="w-full h-full border-0"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="p-6">
+                <p className="mb-3">Player is not available inline for the selected server. You can try another server or open it in a new tab.</p>
+                <div className="flex gap-3">
+                  <Button onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}>Open in new tab</Button>
+                  <Button variant="outline" onClick={() => setShowPlayer(false)}>Close</Button>
+                </div>
               </div>
             )}
           </div>

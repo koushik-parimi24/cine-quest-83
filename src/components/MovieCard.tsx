@@ -54,7 +54,7 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
               navigate(`/${mediaType}/${movie.id}`);
             }}
           >
-            <Play className="h-5 w-5 fill-current" />
+            <Play className="h-5 w-5 text-white" />
           </button>
           <button 
             className="p-3 rounded-full bg-[var(--gradient-secondary)] shadow-lg hover:shadow-[var(--shadow-glow)] transition-all hover:scale-110 animate-bounce-in"
@@ -62,9 +62,9 @@ export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
             onClick={handleWatchLater}
           >
             {isInWatchLater ? (
-              <Check className="h-5 w-5" />
+              <Check className="h-5 w-5 text-white" />
             ) : (
-              <Plus className="h-5 w-5" />
+              <Plus className="h-5 w-5 text-white" />
             )}
           </button>
         </div>

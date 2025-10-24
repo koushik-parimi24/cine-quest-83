@@ -7,6 +7,9 @@ import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { watchHistory, HistoryEntry } from '@/lib/watchHistory';
+import ContinueWatching from '@/components/ContinueWatching';
+import Recommendations from '@/components/Recommendations';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,17 +21,22 @@ const Home = () => {
   const [topRated, setTopRated] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Continue watching and recommendations
+  const [continueWatching, setContinueWatching] = useState<HistoryEntry[]>([]);
+  const [recommendations, setRecommendations] = useState<(Movie & { mediaType?: 'movie' | 'tv' })[]>([]);
+  const [loadingRecs, setLoadingRecs] = useState(false);
+
   useEffect(() => {
     loadContent();
   }, [mediaType]);
 
-  // Auto-rotate hero section every 3 seconds
+  // Auto-rotate hero section every ~6 seconds
   useEffect(() => {
     if (trending.length === 0) return;
     
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % Math.min(trending.length, 5));
-    }, 3000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [trending]);
@@ -58,6 +66,50 @@ const Home = () => {
     }
   };
 
+  // Load continue-watching from localStorage and listen for storage events
+  useEffect(() => {
+    setContinueWatching(watchHistory.getAll());
+    const onStorage = () => setContinueWatching(watchHistory.getAll());
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  // Build simple recommendations based on up to 3 most recent watched items
+  useEffect(() => {
+    if (continueWatching.length === 0) {
+      setRecommendations([]);
+      return;
+    }
+
+    let mounted = true;
+    const fetchRecs = async () => {
+      setLoadingRecs(true);
+      try {
+        const idsToExclude = new Set(continueWatching.map(c => c.id));
+        const recMap = new Map<number, any>();
+        const recent = continueWatching.slice(0, 3);
+
+        for (const entry of recent) {
+          const res = await tmdb.getSimilar(entry.id, entry.mediaType);
+          const items = res.results || [];
+          for (const it of items) {
+            if (idsToExclude.has(it.id)) continue;
+            if (!recMap.has(it.id)) recMap.set(it.id, { ...it, mediaType: entry.mediaType });
+          }
+        }
+
+        if (mounted) setRecommendations(Array.from(recMap.values()).slice(0, 12));
+      } catch (error) {
+        console.error('Failed to load recommendations:', error);
+      } finally {
+        if (mounted) setLoadingRecs(false);
+      }
+    };
+
+    fetchRecs();
+    return () => { mounted = false; };
+  }, [continueWatching]);
+
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}&type=${mediaType}`);
   };
@@ -77,11 +129,24 @@ const Home = () => {
       {/* Hero Section with rotation */}
       <div className="pt-16">
         {trending.length > 0 && (
-          <Hero 
-            key={trending[heroIndex]?.id} 
-            movie={trending[heroIndex]} 
-            mediaType={mediaType} 
+          <Hero
+            movie={trending[heroIndex]}
+            mediaType={mediaType}
           />
+        )}
+
+        {/* Continue Watching */}
+        {continueWatching.length > 0 && (
+          <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+            <ContinueWatching items={continueWatching} />
+          </div>
+        )}
+
+        {/* Recommendations based on recent watching */}
+        {recommendations.length > 0 && (
+          <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+            <Recommendations movies={recommendations} />
+          </div>
         )}
       </div>
 

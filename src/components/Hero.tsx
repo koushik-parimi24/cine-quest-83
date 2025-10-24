@@ -1,5 +1,6 @@
 import { Movie } from '@/types/movie';
 import { getBackdropUrl, getImageUrl } from '@/lib/tmdb';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Plus, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +17,34 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
   const title = movie.title || movie.name || '';
   const isInWatchLater = watchLaterService.isInWatchLater(movie.id);
 
+  // Crossfade state for smooth backdrop transitions
+  const [prevBackdrop, setPrevBackdrop] = useState<string | null>(null);
+  const [currBackdrop, setCurrBackdrop] = useState<string>(getBackdropUrl(movie.backdrop_path));
+  const [fadeIn, setFadeIn] = useState(false);
+
+  useEffect(() => {
+    const next = getBackdropUrl(movie.backdrop_path);
+    if (next === currBackdrop) return; // no change
+
+    // keep current as previous, set new current, then trigger fade
+    setPrevBackdrop(currBackdrop);
+    setCurrBackdrop(next);
+    setFadeIn(false);
+
+    // small delay so the browser registers the starting opacity, then fade
+    const start = window.setTimeout(() => setFadeIn(true), 50);
+    // cleanup after animation (700ms transition + small buffer)
+    const clean = window.setTimeout(() => {
+      setPrevBackdrop(null);
+      setFadeIn(false);
+    }, 900);
+
+    return () => {
+      clearTimeout(start);
+      clearTimeout(clean);
+    };
+  }, [movie.backdrop_path]);
+
   const handleWatchLater = () => {
     watchLaterService.toggle(movie);
     toast.success(isInWatchLater ? 'Removed from Watch Later' : 'Added to Watch Later');
@@ -23,17 +52,34 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
 
   return (
     <div className="relative h-[85vh] w-full overflow-hidden animate-fade-in">
-      {/* Background Image with Gradient Overlay and Animation */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-scale-in"
-        style={{ 
-          backgroundImage: `url(${getBackdropUrl(movie.backdrop_path)})`,
-          willChange: 'transform',
-          animationDuration: '0.8s'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent animate-fade-in" />
-        <div className="absolute inset-0 bg-[var(--gradient-hero)] animate-fade-in" style={{ animationDelay: '0.2s' }} />
+      {/* Background Image with Gradient Overlay and smooth crossfade between images */}
+      <div className="absolute inset-0">
+        {/* Previous backdrop (fades out) */}
+        {prevBackdrop && (
+          <div
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-in-out`}
+            style={{
+              backgroundImage: `url(${prevBackdrop})`,
+              opacity: fadeIn ? 0 : 1,
+              willChange: 'opacity, transform',
+            }}
+          />
+        )}
+
+        {/* Current backdrop (fades in) */}
+        <div
+          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-in-out`}
+          style={{
+            backgroundImage: `url(${currBackdrop})`,
+            opacity: prevBackdrop ? (fadeIn ? 1 : 0) : 1,
+            willChange: 'opacity, transform',
+            transform: 'scale(1.02)'
+          }}
+        />
+
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-[var(--gradient-hero)]" style={{ animationDelay: '0.2s' }} />
       </div>
 
       {/* Content */}
