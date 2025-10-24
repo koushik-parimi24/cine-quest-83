@@ -21,6 +21,12 @@ const MovieDetails = () => {
   const [similar, setSimilar] = useState<any[]>([]);
   const [isInWatchLater, setIsInWatchLater] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [selectedServer, setSelectedServer] = useState('server1');
+  const [selectedSeason, setSelectedSeason] = useState(1);
+  const [selectedEpisode, setSelectedEpisode] = useState(1);
+  const [seasonData, setSeasonData] = useState<any>(null);
+  const [loadingSeason, setLoadingSeason] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -45,6 +51,14 @@ const MovieDetails = () => {
       setVideos(videosRes.results || []);
       setReviews(reviewsRes.results || []);
       setSimilar(similarRes.results || []);
+      
+      // Set initial season for TV shows
+      if (mediaType === 'tv' && detailsRes?.seasons?.length) {
+        const firstRealSeason = detailsRes.seasons.find((s: any) => s.season_number > 0);
+        if (firstRealSeason) {
+          setSelectedSeason(firstRealSeason.season_number);
+        }
+      }
     } catch (error) {
       console.error('Error loading details:', error);
     } finally {
@@ -52,12 +66,82 @@ const MovieDetails = () => {
     }
   };
 
+  // Fetch season data for TV shows
+  useEffect(() => {
+    if (mediaType === 'tv' && id && details && selectedSeason) {
+      const fetchSeasonData = async () => {
+        setLoadingSeason(true);
+        try {
+          const response = await tmdb.getDetails(parseInt(id), 'tv');
+          // Fetch specific season details
+          const seasonResponse = await fetch(
+            `https://api.themoviedb.org/3/tv/${id}/season/${selectedSeason}`,
+            {
+              headers: {
+                accept: 'application/json',
+                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWJiYjQwMTA5ZDBmZDYyYjI3OTY3MGE2MDU4NDA2MyIsIm5iZiI6MTc1MTY5NTcwOC43NzIsInN1YiI6IjY4NjhjMTVjYzhlYzE3NDVhM2NlZGM1OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.t_nlKGADApnBaOxU2sdH8eSQK9JR8qanrBulfD8rUEE'
+              }
+            }
+          );
+          const seasonData = await seasonResponse.json();
+          setSeasonData(seasonData);
+          setSelectedEpisode(1);
+        } catch (error) {
+          console.error('Failed to load season data:', error);
+        } finally {
+          setLoadingSeason(false);
+        }
+      };
+      fetchSeasonData();
+    }
+  }, [id, mediaType, details, selectedSeason]);
+
   const handleWatchLater = () => {
     if (details) {
       watchLaterService.toggle(details as any);
       setIsInWatchLater(!isInWatchLater);
       toast.success(isInWatchLater ? 'Removed from Watch Later' : 'Added to Watch Later');
     }
+  };
+
+  const streamingServers = {
+    server1: {
+      name: 'VidLink',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`
+          : `https://vidlink.pro/movie/${tmdbId}`,
+      quality: 'HD',
+    },
+    server2: {
+      name: 'VidSrc',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
+          : `https://vidsrc.me/embed/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server3: {
+      name: '2Embed',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
+          : `https://www.2embed.cc/embed/${tmdbId}`,
+      quality: 'HD',
+    },
+    server4: {
+      name: 'VidEasy',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
+          : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
+      quality: 'HD',
+    },
+  };
+
+  const getCurrentStreamUrl = () => {
+    const server = streamingServers[selectedServer as keyof typeof streamingServers];
+    return server.url(id!, mediaType, selectedSeason, selectedEpisode);
   };
 
   const handleSearch = (query: string) => {
@@ -184,10 +268,10 @@ const MovieDetails = () => {
                 <Button
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105 touch-manipulation font-bold"
-                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer?.key || ''}`, '_blank')}
+                  onClick={() => setShowPlayer(!showPlayer)}
                 >
                   <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
-                  Watch Now
+                  {showPlayer ? 'Hide Player' : 'Watch Now'}
                 </Button>
                 {trailer && (
                   <Button
@@ -213,6 +297,89 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Video Player Section */}
+      {showPlayer && (
+        <div className="container mx-auto px-4 lg:px-8 py-8 animate-fade-in">
+          <div className="bg-card rounded-lg border border-border overflow-hidden">
+            {/* Server Selection */}
+            <div className="p-4 border-b border-border bg-muted/50">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm font-semibold text-muted-foreground">Server:</span>
+                {Object.entries(streamingServers).map(([key, server]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedServer(key)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedServer === key
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    {server.name} <span className="text-xs opacity-70">({server.quality})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Season & Episode Selection for TV Shows */}
+            {mediaType === 'tv' && details?.seasons && (
+              <div className="p-4 border-b border-border bg-muted/30">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Season Selector */}
+                  <div className="flex-1">
+                    <label className="text-sm font-semibold text-muted-foreground mb-2 block">Season:</label>
+                    <select
+                      value={selectedSeason}
+                      onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
+                      className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      {details.seasons
+                        .filter((s: any) => s.season_number > 0)
+                        .map((season: any) => (
+                          <option key={season.id} value={season.season_number}>
+                            Season {season.season_number} ({season.episode_count} episodes)
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  {/* Episode Selector */}
+                  <div className="flex-1">
+                    <label className="text-sm font-semibold text-muted-foreground mb-2 block">Episode:</label>
+                    <select
+                      value={selectedEpisode}
+                      onChange={(e) => setSelectedEpisode(parseInt(e.target.value))}
+                      disabled={loadingSeason}
+                      className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                    >
+                      {seasonData?.episodes ? (
+                        seasonData.episodes.map((ep: any) => (
+                          <option key={ep.id} value={ep.episode_number}>
+                            Episode {ep.episode_number}: {ep.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={1}>Episode 1</option>
+                      )}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Player */}
+            <div className="relative aspect-video bg-black">
+              <iframe
+                src={getCurrentStreamUrl()}
+                className="absolute inset-0 w-full h-full"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cast & Crew */}
       <div className="container mx-auto px-4 lg:px-8 py-12">

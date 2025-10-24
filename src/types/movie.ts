@@ -24,6 +24,17 @@ export interface MovieDetails extends Movie {
   production_companies: ProductionCompany[];
   number_of_seasons?: number;
   number_of_episodes?: number;
+  seasons?: Season[];
+}
+
+export interface Season {
+  id: number;
+  season_number: number;
+  episode_count: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  air_date: string;
 }
 
 export interface Genre {
