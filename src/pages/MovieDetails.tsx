@@ -181,13 +181,21 @@ const MovieDetails = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 sm:gap-4">
+                <Button
+                  size="lg"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105 touch-manipulation font-bold"
+                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer?.key || ''}`, '_blank')}
+                >
+                  <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+                  Watch Now
+                </Button>
                 {trailer && (
                   <Button
                     size="lg"
-                    className="bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105 touch-manipulation"
+                    className="bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] transition-all hover:scale-105 touch-manipulation"
                     onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
                   >
-                    <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+                    <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     Watch Trailer
                   </Button>
                 )}
