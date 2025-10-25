@@ -1,8 +1,10 @@
-import { Search, Bookmark, Film } from 'lucide-react';
+import { Search, Bookmark, Clapperboard } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -43,7 +45,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
             className="flex items-center gap-2 group"
           >
             <div className="p-2 rounded-lg bg-[var(--gradient-primary)] shadow-[var(--shadow-glow)]">
-              <Film className="h-6 w-6" />
+              <Clapperboard className="h-6 w-6" />
             </div>
             <span className="text-2xl font-black bg-[var(--gradient-primary)] bg-clip-text text-transparent">
               CinemaHub
@@ -67,15 +69,18 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
             </Button>
           </form>
 
-          {/* Watch Later Button */}
-          <Button
-            variant="outline"
-            onClick={() => navigate('/watch-later')}
-            className="gap-2 border-accent/50 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
-          >
-            <Bookmark className="h-4 w-4" />
-            <span className="hidden lg:inline">Watch Later</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            {/* Watch Later Button */}
+            <Button
+              variant="outline"
+              onClick={() => navigate('/watch-later')}
+              className="gap-2 border-accent/50 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
+            >
+              <Bookmark className="h-4 w-4" />
+              <span className="hidden lg:inline">Watch Later</span>
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Search */}
