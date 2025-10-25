@@ -198,7 +198,7 @@ const MovieDetails = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${getBackdropUrl(details.backdrop_path)})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
           <div className="absolute inset-0 bg-[var(--gradient-hero)]" />
         </div>
 
@@ -512,7 +512,7 @@ const MovieDetails = () => {
         <div className="container mx-auto px-4 lg:px-8 py-12">
           <h2 className="text-3xl font-bold mb-6">Reviews</h2>
           <div className="space-y-6">
-            {reviews.slice(0, 3).map(review => (
+            {reviews.slice(0, 10).map(review => (
               <div key={review.id} className="bg-card p-6 rounded-lg border border-border">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-xl font-bold">

@@ -78,7 +78,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
         />
 
         {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent" />
         <div className="absolute inset-0 bg-[var(--gradient-hero)]" style={{ animationDelay: '0.2s' }} />
       </div>
 
@@ -112,7 +112,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
             <div className="flex flex-wrap gap-3 sm:gap-4 pt-4">
               <Button 
                 size="lg"
-                className="bg-[var(--gradient-primary)] hover:shadow-[var(--shadow-glow-bright)] font-bold transition-all hover:scale-105 touch-manipulation"
+                className=" bg-red-700 hover:shadow-[var(--shadow-glow-bright)] font-bold transition-all hover:scale-105 touch-manipulation"
                 onClick={() => navigate(`/${mediaType}/${movie.id}`)}
               >
                 <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
@@ -120,7 +120,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
               </Button>
               <Button 
                 size="lg"
-                className="bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] font-bold transition-all hover:scale-105 touch-manipulation"
+                className="bg-red-700 hover:shadow-[var(--shadow-glow)] font-bold transition-all hover:scale-105 touch-manipulation"
                 onClick={() => navigate(`/${mediaType}/${movie.id}`)}
               >
                 <Info className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
