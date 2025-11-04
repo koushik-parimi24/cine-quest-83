@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tmdb, getBackdropUrl, getImageUrl } from '@/lib/tmdb';
 import { MovieDetails as MovieDetailsType, Credits, Video, Review, MediaType } from '@/types/movie';
@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/Navbar';
 import { MovieRow } from '@/components/MovieRow';
 import { Play, Plus, Check, ArrowLeft, DollarSign, Calendar, Clock, Star } from 'lucide-react';
-import { watchLaterService } from '@/lib/watchLater';
 import { watchHistory } from '@/lib/watchHistory';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { supabase } from '@/lib/supabaseClient';
 
 const MovieDetails = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -20,8 +21,13 @@ const MovieDetails = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [similar, setSimilar] = useState<any[]>([]);
-  const [isInWatchLater, setIsInWatchLater] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { user, watchlist, add, remove } = useWatchlist();
+  
+  const isInWatchLater = useMemo(
+    () => watchlist.some(item => item.media_id === parseInt(id!)),
+    [watchlist, id]
+  );
   const [showPlayer, setShowPlayer] = useState(false);
   const [selectedServer, setSelectedServer] = useState('server1');
   const [selectedSeason, setSelectedSeason] = useState(1);
@@ -32,7 +38,6 @@ const MovieDetails = () => {
   useEffect(() => {
     if (id) {
       loadDetails();
-      setIsInWatchLater(watchLaterService.isInWatchLater(parseInt(id)));
     }
   }, [id, mediaType]);
 
@@ -97,11 +102,52 @@ const MovieDetails = () => {
     }
   }, [id, mediaType, details, selectedSeason]);
 
-  const handleWatchLater = () => {
-    if (details) {
-      watchLaterService.toggle(details as any);
-      setIsInWatchLater(!isInWatchLater);
-      toast.success(isInWatchLater ? 'Removed from Watch Later' : 'Added to Watch Later');
+  const handleWatchLater = async () => {
+    if (!user) {
+      toast.error('Please login to add to watchlist', {
+        action: {
+          label: 'Login',
+          onClick: async () => {
+            await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: { redirectTo: window.location.href },
+            });
+          },
+        },
+      });
+      return;
+    }
+    
+    if (!details || !id) return;
+    
+    const movieId = parseInt(id);
+    if (isNaN(movieId)) {
+      console.error('Invalid movie ID:', id);
+      toast.error('Unable to add - invalid movie ID');
+      return;
+    }
+    
+    try {
+      if (isInWatchLater) {
+        await remove(movieId);
+        toast.success('Removed from Watch Later');
+      } else {
+        await add({
+          media_id: movieId,
+          media_type: mediaType,
+          title: details.title || details.name,
+          original_title: details.title,
+          original_name: details.name,
+          poster_path: details.poster_path || undefined,
+          release_date: details.release_date,
+          first_air_date: details.first_air_date,
+          vote_average: details.vote_average,
+        });
+        toast.success('Added to Watch Later');
+      }
+    } catch (error: any) {
+      console.error('Watchlist error:', error);
+      toast.error(error?.message || 'Failed to update watchlist');
     }
   };
 

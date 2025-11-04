@@ -1,11 +1,12 @@
 import { Movie } from '@/types/movie';
 import { getBackdropUrl, getImageUrl } from '@/lib/tmdb';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Plus, Info } from 'lucide-react';
+import { Play, Plus, Info, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { watchLaterService } from '@/lib/watchLater';
 import { toast } from 'sonner';
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { supabase } from '@/lib/supabaseClient';
 
 interface HeroProps {
   movie: Movie;
@@ -14,8 +15,13 @@ interface HeroProps {
 
 export const Hero = ({ movie, mediaType }: HeroProps) => {
   const navigate = useNavigate();
+  const { user, watchlist, add, remove } = useWatchlist();
   const title = movie.title || movie.name || '';
-  const isInWatchLater = watchLaterService.isInWatchLater(movie.id);
+  
+  const isInWatchLater = useMemo(
+    () => watchlist.some(item => item.media_id === movie.id),
+    [watchlist, movie.id]
+  );
 
   // Crossfade state for smooth backdrop transitions
   const [prevBackdrop, setPrevBackdrop] = useState<string | null>(null);
@@ -45,9 +51,50 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
     };
   }, [movie.backdrop_path]);
 
-  const handleWatchLater = () => {
-    watchLaterService.toggle(movie);
-    toast.success(isInWatchLater ? 'Removed from Watch Later' : 'Added to Watch Later');
+  const handleWatchLater = async () => {
+    if (!user) {
+      toast.error('Please login to add to watchlist', {
+        action: {
+          label: 'Login',
+          onClick: async () => {
+            await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: { redirectTo: window.location.href },
+            });
+          },
+        },
+      });
+      return;
+    }
+
+    if (!movie.id) {
+      console.error('Movie ID is missing:', movie);
+      toast.error('Unable to add - movie ID missing');
+      return;
+    }
+
+    try {
+      if (isInWatchLater) {
+        await remove(movie.id);
+        toast.success('Removed from Watch Later');
+      } else {
+        await add({
+          media_id: movie.id,
+          media_type: mediaType,
+          title: movie.title || movie.name,
+          original_title: movie.title,
+          original_name: movie.name,
+          poster_path: movie.poster_path || undefined,
+          release_date: movie.release_date,
+          first_air_date: movie.first_air_date,
+          vote_average: movie.vote_average,
+        });
+        toast.success('Added to Watch Later');
+      }
+    } catch (error: any) {
+      console.error('Watchlist error:', error);
+      toast.error(error?.message || 'Failed to update watchlist');
+    }
   };
 
   return (
@@ -132,8 +179,12 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
                 className="border-accent/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
                 onClick={handleWatchLater}
               >
-                <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                {isInWatchLater ? 'Remove' : 'Watch Later'}
+                {isInWatchLater ? (
+                  <Check className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                )}
+                {isInWatchLater ? 'In Watchlist' : 'Watch Later'}
               </Button>
             </div>
           </div>

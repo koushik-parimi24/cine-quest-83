@@ -1,10 +1,11 @@
 import { Movie } from '@/types/movie';
 import { getImageUrl } from '@/lib/tmdb';
 import { useNavigate } from 'react-router-dom';
-import { Play, Plus, Check } from 'lucide-react';
-import { watchLaterService } from '@/lib/watchLater';
-import { useState } from 'react';
+import { Play, Plus, Check, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { useMemo } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface MovieCardProps {
   movie: Movie;
@@ -13,16 +14,60 @@ interface MovieCardProps {
 
 export const MovieCard = ({ movie, mediaType }: MovieCardProps) => {
   const navigate = useNavigate();
+  const { user, watchlist, add, remove } = useWatchlist();
   const title = movie.title || movie.name || '';
-  const [isInWatchLater, setIsInWatchLater] = useState(
-    watchLaterService.isInWatchLater(movie.id)
+  
+  const isInWatchLater = useMemo(
+    () => watchlist.some(item => item.media_id === movie.id),
+    [watchlist, movie.id]
   );
 
-  const handleWatchLater = (e: React.MouseEvent) => {
+  const handleWatchLater = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    watchLaterService.toggle(movie);
-    setIsInWatchLater(!isInWatchLater);
-    toast.success(isInWatchLater ? 'Removed from Watch Later' : 'Added to Watch Later');
+    
+    if (!user) {
+      toast.error('Please login to add to watchlist', {
+        action: {
+          label: 'Login',
+          onClick: async () => {
+            await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: { redirectTo: window.location.href },
+            });
+          },
+        },
+      });
+      return;
+    }
+
+    try {
+      if (!movie.id) {
+        console.error('Movie ID is missing:', movie);
+        toast.error('Unable to add - movie ID missing');
+        return;
+      }
+
+      if (isInWatchLater) {
+        await remove(movie.id);
+        toast.success('Removed from Watch Later');
+      } else {
+        await add({
+          media_id: movie.id,
+          media_type: mediaType,
+          title: movie.title || movie.name,
+          original_title: movie.title,
+          original_name: movie.name,
+          poster_path: movie.poster_path || undefined,
+          release_date: movie.release_date,
+          first_air_date: movie.first_air_date,
+          vote_average: movie.vote_average,
+        });
+        toast.success('Added to Watch Later');
+      }
+    } catch (error: any) {
+      console.error('Watchlist error:', error);
+      toast.error(error?.message || 'Failed to update watchlist');
+    }
   };
 
   return (

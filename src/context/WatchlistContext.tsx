@@ -82,10 +82,18 @@ export const WatchlistProvider = ({ children }: WatchlistProviderProps) => {
   // ✅ Add to watchlist (with optimistic update)
   const add = async (item: WatchItem) => {
     if (!user) return;
+    
+    // Use media_id if provided, otherwise fall back to id
+    const mediaId = item.media_id || item.id;
+    
+    if (!mediaId) {
+      console.error('No media_id or id provided:', item);
+      throw new Error('media_id is required');
+    }
 
     const newItem: WatchItem = {
       user_id: user.id,
-      media_id: item.id!,
+      media_id: mediaId,
       media_type: item.media_type ?? (item.title ? 'movie' : 'tv'),
       title: item.title || item.original_title || item.original_name,
       original_title: item.original_title,
@@ -96,12 +104,15 @@ export const WatchlistProvider = ({ children }: WatchlistProviderProps) => {
       vote_average: item.vote_average,
     };
 
+    console.log('Adding to watchlist:', newItem);
+
     const { error } = await supabase
       .from('watchlists')
-    .upsert([newItem], { onConflict: 'user_id,media_id' });
+      .upsert([newItem], { onConflict: 'user_id,media_id' });
 
     if (error) {
-      console.error('Add error:', error.message);
+      console.error('Add error:', error.message, error);
+      throw error;
     } else {
       setWatchlist((prev) => [newItem, ...prev.filter((w) => w.media_id !== newItem.media_id)]);
     }

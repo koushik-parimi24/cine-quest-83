@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { tmdb } from '@/lib/tmdb';
 import ThemeToggle from './ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -31,26 +32,66 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
     getUser();
 
     // ✅ Subscribe to auth changes
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        const userName = session.user.user_metadata?.full_name || 
+                        session.user.user_metadata?.name || 
+                        session.user.email?.split('@')[0] || 
+                        'User';
+        toast.success(`Welcome back, ${userName}!`, {
+          duration: 3000,
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
     });
 
-    return () => subscription?.subscription.unsubscribe();
+    return () => authListener?.subscription.unsubscribe();
   }, []);
 
   // ✅ Login / Logout handlers
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin, // return to app after login
-      },
-    });
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      console.log('Attempting login with redirect:', redirectUrl);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      
+      if (error) {
+        console.error('OAuth error:', error);
+        throw error;
+      }
+      
+      console.log('OAuth initiated:', data);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Failed to login. Please check Supabase configuration.');
+    }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout. Please try again.');
+    }
   };
 
   // ✅ Debounced TMDB search
@@ -187,7 +228,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
                   />
                 )}
                 <span className="text-sm text-gray-300 hidden sm:inline">
-                  Hi, {user.user_metadata?.name || user.email.split('@')[0]}
+                  Hi, {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User'}
                 </span>
                 <Button
                   onClick={handleLogout}

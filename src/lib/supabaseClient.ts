@@ -1,5 +1,3 @@
-'use client'
-
 import { createBrowserClient } from '@supabase/ssr'
 
 // ✅ Vite uses import.meta.env — not process.env
@@ -12,5 +10,13 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   )
 }
 
-// ✅ This creates the browser-safe Supabase client
-export const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// ✅ This creates the browser-safe Supabase client with proper auth config
+export const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    flowType: 'pkce',
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    persistSession: true,
+    storage: window.localStorage,
+  },
+})
