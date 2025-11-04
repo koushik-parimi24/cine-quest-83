@@ -11,13 +11,13 @@ export const ThemeToggle = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return <div style={{ width: 40 }} />; // avoid hydration mismatch
+  if (!mounted) return <div style={{ width: 40 }} />;
 
   const current = theme === 'system' ? systemTheme : theme;
 
   return (
     <Button
-      variant="outline"
+      variant="destructive"
       size="icon"
       onClick={() => setTheme(current === 'dark' ? 'light' : 'dark')}
       aria-label="Toggle theme"

@@ -78,7 +78,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
         />
 
         {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/30 to-transparent" />
         <div className="absolute inset-0 bg-[var(--gradient-hero)]" style={{ animationDelay: '0.2s' }} />
       </div>
 
@@ -87,7 +87,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-2xl space-y-6 animate-slide-up" style={{ animationDelay: '0.3s', animationDuration: '0.6s' }}>
             {/* Title */}
-            <h1 className="text-5xl font-black leading-tight lg:text-7xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-black leading-tight lg:text-7xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text ">
               {title}
             </h1>
 
@@ -104,7 +104,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
             </div>
 
             {/* Overview */}
-            <p className="text-lg leading-relaxed text-foreground/90 line-clamp-3">
+            <p className="text-sm lg:text-lg leading-relaxed text-foreground/90 line-clamp-3">
               {movie.overview}
             </p>
 

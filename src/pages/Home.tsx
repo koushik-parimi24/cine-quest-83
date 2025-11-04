@@ -111,7 +111,7 @@ const Home = () => {
   }, [continueWatching]);
 
   const handleSearch = (query: string) => {
-    navigate(`/search?q=${encodeURIComponent(query)}&type=${mediaType}`);
+    navigate(`/search?q=${encodeURIComponent(query)}`);
   };
 
   if (loading) {
@@ -152,18 +152,18 @@ const Home = () => {
 
       {/* Media Type Toggle */}
       <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
-        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 ml-5">
           <Button
             onClick={() => setMediaType('movie')}
             variant={mediaType === 'movie' ? 'default' : 'outline'}
-            className={mediaType === 'movie' ? 'bg-[var(--gradient-primary)] shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105' : 'touch-manipulation'}
+            className={mediaType === 'movie' ? 'bg-red-600 transition-all hover:scale-105' : 'touch-manipulation'}
           >
             Movies
           </Button>
           <Button
             onClick={() => setMediaType('tv')}
             variant={mediaType === 'tv' ? 'default' : 'outline'}
-            className={mediaType === 'tv' ? 'bg-[var(--gradient-primary)] shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105' : 'touch-manipulation'}
+            className={mediaType === 'tv' ? 'bg-red-600 shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-bright)] transition-all hover:scale-105' : 'touch-manipulation'}
           >
             TV Shows
           </Button>

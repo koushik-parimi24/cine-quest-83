@@ -34,7 +34,7 @@ const WatchLater = () => {
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
 
-      <div className="container mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-32 pb-12">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8 pt-36 ">
         <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Bookmark className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Watch Later</h1>

@@ -44,6 +44,15 @@ export const tmdb = {
     return response.json();
   },
 
+  // Search across all types (movies, TV shows)
+  searchMulti: async (query: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}`,
+      options
+    );
+    return response.json();
+  },
+
   // Get movie or TV show details
   getDetails: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
     const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}`, options);

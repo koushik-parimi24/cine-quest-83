@@ -34,9 +34,9 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
         {/* Left Arrow - Hidden on mobile */}
         <button
           onClick={() => scroll('left')}
-          className="hidden md:flex absolute left-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-r from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center hover:from-background/90"
+          className="hidden md:flex absolute -left-10 top-0 bottom-0 z-10 w-12 bg-gradient-to-r from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center hover:from-background/90"
         >
-          <ChevronLeft className="h-8 w-8" />
+          <ChevronLeft className="h-8 w-8 bg-white text-black rounded-full" />
         </button>
 
         {/* Movies with staggered animations */}
@@ -67,9 +67,9 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
         {/* Right Arrow - Hidden on mobile */}
         <button
           onClick={() => scroll('right')}
-          className="hidden md:flex absolute right-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center hover:from-background/90"
+          className="hidden md:flex absolute -right-16 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center hover:from-background/90"
         >
-          <ChevronRight className="h-8 w-8" />
+          <ChevronRight className="h-8 w-8 bg-white text-black rounded-full" />
         </button>
       </div>
     </div>
