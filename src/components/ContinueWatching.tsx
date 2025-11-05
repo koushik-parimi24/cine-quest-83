@@ -24,7 +24,7 @@ export const ContinueWatching = ({ items: initialItems, onUpdate }: ContinueWatc
     toast.success('Removed from history');
   };
 
-  // 🔥 Clear all watch history
+  
   const handleClearAll = () => {
     if (confirm('Are you sure you want to clear all watch history?')) {
       watchHistory.clear();

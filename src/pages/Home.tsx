@@ -126,7 +126,7 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
 
-      {/* Hero Section with rotation */}
+     
       <div className="pt-16">
         {trending.length > 0 && (
           <Hero

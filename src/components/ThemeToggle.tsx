@@ -23,7 +23,7 @@ export const ThemeToggle = () => {
       aria-label="Toggle theme"
       className='rounded-full'
     >
-      {current === 'dark' ? <Sun className="h-4 w-4 rounded-full" /> : <Moon className="h-4 w-4 rounded-full" />}
+      {current === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4 " />}
     </Button>
   );
 };
