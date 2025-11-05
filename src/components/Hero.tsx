@@ -98,7 +98,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
   };
 
   return (
-    <div className="relative h-[85vh] w-full overflow-hidden animate-fade-in">
+    <div className="relative h-[55vh] w-full overflow-hidden animate-fade-in">
       {/* Background Image with Gradient Overlay and smooth crossfade between images */}
       <div className="absolute inset-0">
         {/* Previous backdrop (fades out) */}
@@ -156,7 +156,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 sm:gap-4 pt-4">
+            <div className="flex  gap-3 sm:gap-4 pt-4">
               <Button 
                 size="lg"
                 className=" bg-red-700 hover:shadow-[var(--shadow-glow-bright)] font-bold transition-all hover:scale-105 touch-manipulation"
@@ -165,15 +165,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
                 <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                 Watch Now
               </Button>
-              <Button 
-                size="lg"
-                className="bg-red-700 hover:shadow-[var(--shadow-glow)] font-bold transition-all hover:scale-105 touch-manipulation"
-                onClick={() => navigate(`/${mediaType}/${movie.id}`)}
-              >
-                <Info className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                More Info
-              </Button>
-              <Button 
+                <Button 
                 size="lg"
                 variant="outline"
                 className="border-accent/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
@@ -186,6 +178,7 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
                 )}
                 {isInWatchLater ? 'In Watchlist' : 'Watch Later'}
               </Button>
+
             </div>
           </div>
         </div>

@@ -153,7 +153,7 @@ const MovieDetails = () => {
 
   const streamingServers = {
     server1: {
-      name: 'VidLink',
+      name: 'server1',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
           ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`
@@ -161,29 +161,39 @@ const MovieDetails = () => {
       quality: 'HD',
     },
     server2: {
-      name: 'VidSrc',
+  name: 'server 2',
+  url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+    mediaType === 'tv'
+      ? `https://moviesapi.club/tv/${tmdbId}/${season}/${episode}`
+      : `https://moviesapi.club/movie/${tmdbId}?overlay=true`,
+  quality: 'HD',
+},
+server3: {
+  name: 'server3',
+  url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+    mediaType === 'tv'
+      ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
+      : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
+  quality: 'HD',
+},
+    server4: {
+      name: 'server4',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
           ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
           : `https://vidsrc.me/embed/movie/${tmdbId}`,
       quality: 'HD+',
     },
-    server3: {
-      name: '2Embed',
+      server5: {
+      name: 'server5',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
           ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
           : `https://www.2embed.cc/embed/${tmdbId}`,
       quality: 'HD',
     },
-    server4: {
-      name: 'VidEasy',
-      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
-        mediaType === 'tv'
-          ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
-          : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
-      quality: 'HD',
-    },
+
+
   };
 
   const getCurrentStreamUrl = () => {
@@ -193,16 +203,31 @@ const MovieDetails = () => {
 
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
 
-  const addToHistory = (progress?: number) => {
-    if (!details) return;
-    // store the movie/tv in watch history with timestamp and optional progress
-    try {
-      watchHistory.add(details as any, mediaType, progress);
-    } catch (e) {
-      // ignore storage errors
-      console.warn('Failed to write watch history', e);
-    }
-  };
+const addToHistory = (progress?: number) => {
+  if (!details) return;
+
+  try {
+    // Ensure the movie object includes all rating data
+    const safeDetails = {
+      ...details,
+      vote_average: details.vote_average ?? 0,
+      vote_count: details.vote_count ?? 0,
+      title: details.title || details.name || "Untitled",
+    };
+
+    // Log once for debugging
+    console.log("Saving history:", {
+      title: safeDetails.title,
+      rating: safeDetails.vote_average,
+      type: mediaType,
+    });
+
+    watchHistory.add(safeDetails as any, mediaType, progress);
+  } catch (e) {
+    console.warn("Failed to write watch history", e);
+  }
+};
+
 
   // update streamUrl when selection changes
   useEffect(() => {
@@ -240,45 +265,36 @@ const MovieDetails = () => {
 
       {/* Hero Section */}
       <div className="relative pt-16">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${getBackdropUrl(details.backdrop_path)})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
-          <div className="absolute inset-0 bg-[var(--gradient-hero)]" />
-        </div>
-
         <div className="relative z-10 container mx-auto px-4 lg:px-8 py-12">
           <Button
             variant="ghost"
             onClick={() => navigate(-1)}
-            className="mb-6"
+            className="mb-3 mt-4 bg-white text-black rounded-full"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            <ArrowLeft className="h-4 w-4 " />
           </Button>
 
-          <div className="grid lg:grid-cols-[300px,1fr] gap-8 items-start">
+          <div className="grid lg:grid-cols-[258px,1fr] gap-8 items-start">
             {/* Poster */}
             <img
-              src={getImageUrl(details.poster_path, 'w500')}
+              src={getImageUrl(details.poster_path)}
               alt={title}
-              className="rounded-lg shadow-2xl w-full"
+              className="rounded-lg shadow-2xl   "
             />
 
             {/* Details */}
-            <div className="space-y-6 animate-fade-in">
-              <h1 className="text-5xl font-black">{title}</h1>
+            <div className="space-y-3 animate-fade-in">
+              <h1 className="text-2xl  lg:text-5xl md:text-3xl font-black">{title}</h1>
               
               {details.tagline && (
-                <p className="text-xl text-muted-foreground italic">{details.tagline}</p>
+                <p className="text-sm md:text-xl lg:text-3xl text-muted-foreground italic">{details.tagline}</p>
               )}
 
               {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-4 text-sm ">
                 <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-accent fill-accent" />
-                  <span className="text-lg font-bold">{details.vote_average.toFixed(1)}</span>
+                  <Star className="h-3 md:h-5 lg:h-5 w-5 text-accent fill-accent" />
+                  <span className="text-xs font-bold">{details.vote_average.toFixed(1)}</span>
                   <span className="text-muted-foreground">({details.vote_count} votes)</span>
                 </div>
                 {details.release_date && (

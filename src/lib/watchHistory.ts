@@ -11,7 +11,9 @@ export type HistoryEntry = {
   poster_path?: string | null;
   backdrop_path?: string | null;
   lastWatchedAt: number;
-  progress?: number; // optional playback progress in seconds or percent
+  progress?: number; 
+  vote_average?: number;
+  vote_count?: number;
 };
 
 export const watchHistory = {
@@ -31,6 +33,8 @@ export const watchHistory = {
       poster_path: movie.poster_path || null,
       backdrop_path: movie.backdrop_path || null,
       lastWatchedAt: now,
+      vote_average: movie.vote_average,
+      vote_count:movie.vote_count,
       progress,
     };
 
