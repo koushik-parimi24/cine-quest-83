@@ -269,7 +269,8 @@ const addToHistory = (progress?: number) => {
           <Button
             variant="ghost"
             onClick={() => navigate(-1)}
-            className="mb-3 mt-4 bg-white text-black rounded-full"
+            className="mb-3 mt-4 bg-red-300 text-black rounded-full"
+
           >
             <ArrowLeft className="h-4 w-4 " />
           </Button>
