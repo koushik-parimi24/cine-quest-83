@@ -2,7 +2,9 @@ import { useEffect } from "react";
 
 const MonetagScripts: React.FC = () => {
   useEffect(() => {
-    // 🟣 Updated Push Notification Tag
+
+
+    
 
 
     // 🟠 Updated OnClick (Popunder) Tag
@@ -17,7 +19,7 @@ const MonetagScripts: React.FC = () => {
 
     // Cleanup on unmount
     return () => {
-      document.body.removeChild(pushScript);
+      
       document.body.removeChild(popunderScript);
     };
   }, []);
