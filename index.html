@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaHub - Discover Movies & TV Shows</title>
@@ -9,7 +10,7 @@
       content="Discover trending movies and TV shows. Get recommendations, watch trailers, and save your favorites to watch later."
     />
     <meta name="author" content="CinemaHub" />
-    
+    <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
     <meta name="monetag" content="478f028771baf017c1a7d886f6f667fc">
 
     <!-- ✅ Google Fonts -->
@@ -31,20 +32,23 @@
     />
     <meta property="og:type" content="website" />
 
-    <!-- 🟣 Monetag Push Notification Tag -->
+
 
 
     <!-- 🟠 Monetag OnClick (Popunder) Tag -->
-<script>
+<!-- <script>
   (function(s){s.dataset.zone='10146220',
   s.src='https://al5sm.com/tag.min.js'})
   ([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
-</script>
-<!-- vignette-->
+</script> -->
 
+<script type="text/javascript">
+    aclib.runAutoTag({
+        zoneId: 'qrqsamrue2',
+    });
+</script>
 
   </head>
-
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
