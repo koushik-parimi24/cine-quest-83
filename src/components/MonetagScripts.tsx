@@ -3,11 +3,7 @@ import { useEffect } from "react";
 const MonetagScripts: React.FC = () => {
   useEffect(() => {
     // 🟣 Updated Push Notification Tag
-    const pushScript = document.createElement("script");
-    pushScript.src = "https://3nbf4.com/act/files/tag.min.js?z=10146225";
-    pushScript.async = true;
-    pushScript.setAttribute("data-cfasync", "false");
-    document.body.appendChild(pushScript);
+
 
     // 🟠 Updated OnClick (Popunder) Tag
     const popunderScript = document.createElement("script");
