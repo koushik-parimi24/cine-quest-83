@@ -10,7 +10,7 @@
       content="Discover trending movies and TV shows. Get recommendations, watch trailers, and save your favorites to watch later."
     />
     <meta name="author" content="CinemaHub" />
-    <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+    <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" async></script>
     <meta name="monetag" content="478f028771baf017c1a7d886f6f667fc">
 
     <!-- ✅ Google Fonts -->
@@ -24,7 +24,7 @@
     <!-- ✅ Open Graph Metadata -->
     <meta
       property="og:title"
-      content="CinemaHub - Discover Movies & TV Shows"
+      content="bingenow - Discover Movies & TV Shows"
     />
     <meta
       property="og:description"
@@ -32,31 +32,51 @@
     />
     <meta property="og:type" content="website" />
 
-
-
-
     <!-- 🟠 Monetag OnClick (Popunder) Tag -->
-<!-- <script>
-  (function(s){s.dataset.zone='10146220',
-  s.src='https://al5sm.com/tag.min.js'})
-  ([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
-</script> -->
+    <!-- 
+    <script>
+      (function(s){s.dataset.zone='10146220',
+      s.src='https://al5sm.com/tag.min.js'})
+      ([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+    </script> 
+    -->
 
-<script type="text/javascript">
-    aclib.runAutoTag({
-        zoneId: 'qrqsamrue2',
-    });
-</script>
-<div class="adbanner">
-    <script type="text/javascript">
-        aclib.runBanner({
-            zoneId: '10593250',
-        });
-    </script>
-</div>
   </head>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RY9FJ4364W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RY9FJ4364W');
+  </script>
+
   <body>
     <div id="root"></div>
+
+    <!-- ✅ AdCash Ad Section (Fixed Placement) -->
+    <div id="ad-banner" style="margin-top: 20px; text-align: center;"></div>
+
+    <script>
+      window.onload = function() {
+        if (window.aclib) {
+          // Auto ad tag
+          aclib.runAutoTag({
+            zoneId: 'qrqsamrue2',
+          });
+
+          // Banner ad tag
+          aclib.runBanner({
+            zoneId: '10593250',
+            containerId: 'ad-banner'
+          });
+        } else {
+          console.error("AdCash library not loaded yet.");
+        }
+      };
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
