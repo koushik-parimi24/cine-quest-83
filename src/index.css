@@ -129,3 +129,11 @@ All colors MUST be HSL.
     transform: translateY(-8px);
   }
 }
+.adbanner{
+  margin-top: 80px;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
