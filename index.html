@@ -10,7 +10,7 @@
       content="Discover trending movies and TV shows. Get recommendations, watch trailers, and save your favorites to watch later."
     />
     <meta name="author" content="CinemaHub" />
-    <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" async></script>
+    <!-- <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" async></script> -->
     <meta name="monetag" content="478f028771baf017c1a7d886f6f667fc">
 
     <!-- ✅ Google Fonts -->
@@ -33,13 +33,13 @@
     <meta property="og:type" content="website" />
 
     <!-- 🟠 Monetag OnClick (Popunder) Tag -->
-    <!-- 
+    
     <script>
       (function(s){s.dataset.zone='10146220',
       s.src='https://al5sm.com/tag.min.js'})
       ([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
     </script> 
-    -->
+   
 
   </head>
 
@@ -56,9 +56,9 @@
     <div id="root"></div>
 
     <!-- ✅ AdCash Ad Section (Fixed Placement) -->
-    <div id="ad-banner" style="margin-top: 20px; text-align: center;"></div>
+    <!-- <div id="ad-banner" style="margin-top: 20px; text-align: center;"></div> -->
 
-    <script>
+    <!-- <script>
       window.onload = function() {
         if (window.aclib) {
           // Auto ad tag
@@ -75,8 +75,11 @@
           console.error("AdCash library not loaded yet.");
         }
       };
-    </script>
-
+    </script> -->
+</div>
+  </head>
+  <body>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
