@@ -42,7 +42,7 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
         {/* Movies with staggered animations */}
         <div 
           ref={scrollRef}
-          className="flex gap-3 sm:gap-4 overflow-x-scroll scrollbar-hide px-3 sm:px-4 lg:px-8 pb-4"
+          className="flex gap-3 sm:gap-4 overflow-x-scroll scrollbar-hide px-3 sm:px-4 lg:px-8 pb-4 "
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',

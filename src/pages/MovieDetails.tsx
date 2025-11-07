@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/lib/supabaseClient';
+import { ShareButton } from "../components/ShareMenu";
 
 const MovieDetails = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -364,7 +365,7 @@ const addToHistory = (progress?: number) => {
                 {trailer && (
                   <Button
                     size="lg"
-                    className="bg-[var(--gradient-secondary)] hover:shadow-[var(--shadow-glow)] transition-all hover:scale-105 touch-manipulation"
+                    className="bg-primary hover:shadow-[var(--shadow-glow)] transition-all hover:scale-105 touch-manipulation"
                     onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
                   >
                     <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -380,6 +381,13 @@ const addToHistory = (progress?: number) => {
                   {isInWatchLater ? <Check className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> : <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />}
                   {isInWatchLater ? 'In Watch Later' : 'Add to Watch Later'}
                 </Button>
+
+                <ShareButton
+                title={details.title || details.name}
+                text={`Watch ${details.title || details.name} on CinemaHub!`}
+                mediaType={mediaType}
+                id={id!}
+                />
               </div>
             </div>
           </div>
@@ -514,15 +522,15 @@ const addToHistory = (progress?: number) => {
               </div>
             </div>
             {streamUrl ? (
-              <div className="w-full aspect-video bg-black rounded-md overflow-hidden">
-                <iframe
-                  title="Inline player"
-                  src={streamUrl}
-                  className="w-full h-full border-0"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+  <div className="w-full aspect-video bg-black rounded-md overflow-hidden">
+    <iframe
+      title="Inline player"
+      src={streamUrl}
+      className="w-full h-full border-0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowFullScreen
+    />
+  </div>
             ) : (
               <div className="p-6">
                 <p className="mb-3">Player is not available inline for the selected server. You can try another server or open it in a new tab.</p>
