@@ -8,6 +8,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // --- ADD THIS PROXY SECTION ---
+    proxy: {
+      '/api/tmdb': {
+        target: 'https://api.themoviedb.org/3',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/tmdb/, ''),
+      },
+    }
+    // ------------------------------
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://api.themoviedb.org/3';
+const API_BASE_URL = '/api/tmdb';
 const API_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWJiYjQwMTA5ZDBmZDYyYjI3OTY3MGE2MDU4NDA2MyIsIm5iZiI6MTc1MTY5NTcwOC43NzIsInN1YiI6IjY4NjhjMTVjYzhlYzE3NDVhM2NlZGM1OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.t_nlKGADApnBaOxU2sdH8eSQK9JR8qanrBulfD8rUEE';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 

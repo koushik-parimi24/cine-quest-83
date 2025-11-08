@@ -82,7 +82,7 @@ const MovieDetails = () => {
           const response = await tmdb.getDetails(parseInt(id), 'tv');
           // Fetch specific season details
           const seasonResponse = await fetch(
-            `https://api.themoviedb.org/3/tv/${id}/season/${selectedSeason}`,
+            `/api/tmdb/tv/${id}/season/${selectedSeason}`,
             {
               headers: {
                 accept: 'application/json',
@@ -157,7 +157,7 @@ const MovieDetails = () => {
       name: 'server1',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`
+          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
           : `https://vidlink.pro/movie/${tmdbId}`,
       quality: 'HD',
     },
@@ -171,10 +171,21 @@ const MovieDetails = () => {
 },
 server3: {
   name: 'server3',
-  url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
-    mediaType === 'tv'
-      ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
-      : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
+  url: (
+    tmdbId: string,
+    mediaType: string,
+    season?: number,
+    episode?: number,
+    anilist_id?: string
+  ) => {
+    if (mediaType === 'tv') {
+      return `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`;
+    } else if (mediaType === 'anime' && anilist_id) {
+      return `https://player.videasy.net/anime/${anilist_id}/episode?dub=true`;
+    } else {
+      return `https://player.videasy.net/movie/${tmdbId}?overlay=true`;
+    }
+  },
   quality: 'HD',
 },
     server4: {
@@ -529,6 +540,7 @@ const addToHistory = (progress?: number) => {
       className="w-full h-full border-0"
       allow="autoplay; fullscreen; picture-in-picture"
       allowFullScreen
+      
     />
   </div>
             ) : (
