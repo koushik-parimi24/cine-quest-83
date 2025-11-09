@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import { toast } from 'sonner';
-import { tmdb } from '@/lib/tmdb'; // ✅ make sure you have tmdb client setup
+import { tmdb } from '@/lib/tmdb';
 
 export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // ✅ Fetch Supabase user session
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -30,7 +31,7 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
-  // ✅ Handle Login / Logout
+  // ✅ Handle login/logout
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -52,7 +53,7 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
     }
   };
 
-  // ✅ Fetch live search suggestions
+  // ✅ Fetch search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length < 2) {
@@ -64,13 +65,10 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
         const data = await tmdb.searchMulti(searchQuery);
         const results = data.results || [];
 
-        // Filter valid titles and sort by rating (descending)
         const topResults = results
-          .filter(
-            (item: any) => (item.title || item.name) && item.vote_average > 0
-          )
+          .filter((item: any) => (item.title || item.name) && item.vote_average > 0)
           .sort((a: any, b: any) => b.vote_average - a.vote_average)
-          .slice(0, 6); // limit to top 6
+          .slice(0, 6);
 
         setSuggestions(topResults);
         setShowSuggestions(true);
@@ -79,11 +77,11 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
       }
     };
 
-    const delay = setTimeout(fetchSuggestions, 300); // debounce input
+    const delay = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(delay);
   }, [searchQuery]);
 
-  // ✅ Close suggestions when clicked outside
+  // ✅ Hide suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -97,7 +95,7 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-gray-800 shadow-md transition-all duration-300">
       <div className="container mx-auto px-4 flex items-center justify-between h-16 relative">
-        {/* Logo */}
+        {/* ✅ Logo */}
         <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
           <img
             src="https://anmelxfindmnmefmtbdo.supabase.co/storage/v1/object/public/logo/logo.png"
@@ -109,8 +107,8 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
           </span>
         </button>
 
-        {/* Search Bar */}
-        <div className="flex-1 mx-4 max-w-md sm:max-w-lg relative" ref={searchRef}>
+        {/* ✅ Search Bar */}
+        <div className="flex-1 mx-2 sm:mx-4 max-w-[180px] sm:max-w-lg relative" ref={searchRef}>
           <form onSubmit={handleSearch} className="flex items-center relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -118,11 +116,11 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search movies & TV shows..."
-              className="w-full pl-10 border border-gray-700  placeholder:text-gray-700 rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
+              className="w-full pl-10 border border-gray-700 placeholder:text-gray-700 rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
             />
           </form>
 
-          {/* 🔽 Suggestions Dropdown */}
+          {/* ✅ Suggestions */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-12 left-0 w-full bg-[#141414] border border-gray-800 rounded-lg shadow-lg overflow-hidden z-50">
               {suggestions.map((item: any) => (
@@ -134,9 +132,7 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
                     navigate(`/${item.media_type}/${item.id}`);
                   }}
                 >
-                  <span className="text-gray-200 text-sm truncate">
-                    {item.title || item.name}
-                  </span>
+                  <span className="text-gray-200 text-sm truncate">{item.title || item.name}</span>
                   <div className="flex items-center gap-1 text-yellow-400 text-xs">
                     <Star className="h-3 w-3 fill-current" />
                     {item.vote_average.toFixed(1)}
@@ -147,8 +143,9 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
           )}
         </div>
 
-        {/* Right Section */}
+        {/* ✅ Right Section */}
         <div className="flex items-center gap-3">
+          {/* Desktop Menu */}
           <div className="hidden sm:flex items-center gap-3">
             {user ? (
               <>
@@ -190,15 +187,48 @@ export const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu */}
+          {/* ✅ Mobile Burger Icon */}
           <button
-            className="sm:hidden p-2 rounded-md hover:bg-[#1a1a1a] transition"
+            className="sm:hidden p-2 rounded-md hover:bg-[#1a1a1a] transition text-white"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X className="h-6 w-6 text-white" /> : <Menu className="h-6 w-6 text-white" />}
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
+
+      {/* ✅ Mobile Dropdown Menu */}
+      {menuOpen && (
+        <div className="sm:hidden bg-[#141414] border-t border-gray-800 px-4 py-3 space-y-3 animate-slideDown">
+          {user ? (
+            <>
+              <Button
+                onClick={handleLogout}
+                className="w-full bg-red-600 hover:bg-red-700 text-white rounded-full"
+              >
+                Logout
+              </Button>
+              <Button
+                onClick={() => navigate('/watch-later')}
+                variant="outline"
+                className="w-full border-red-500/50 text-red-400 hover:bg-red-600 hover:text-white rounded-full"
+              >
+                Watch Later
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={handleLogin}
+              className="w-full bg-red-600 hover:bg-red-700 text-white rounded-full"
+            >
+              Login
+            </Button>
+          )}
+          <div className="flex justify-center">
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
