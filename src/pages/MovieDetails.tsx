@@ -13,6 +13,17 @@ import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/lib/supabaseClient';
 import { ShareButton } from "../components/ShareMenu";
 
+// Define the Vidfast origins
+const vidfastOrigins = [
+    'https://vidfast.pro',
+    'https://vidfast.in',
+    'https://vidfast.io',
+    'https://vidfast.me',
+    'https://vidfast.net',
+    'https://vidfast.pm',
+    'https://vidfast.xyz'
+];
+
 const MovieDetails = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
@@ -82,7 +93,7 @@ const MovieDetails = () => {
           const response = await tmdb.getDetails(parseInt(id), 'tv');
           // Fetch specific season details
           const seasonResponse = await fetch(
-            `/api/tmdb/tv/${id}/season/${selectedSeason}`,
+            `https://api.themoviedb.org/3/tv/${id}/season/${selectedSeason}`,
             {
               headers: {
                 accept: 'application/json',
@@ -165,8 +176,8 @@ const MovieDetails = () => {
   name: 'server 2',
   url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
     mediaType === 'tv'
-      ? `https://moviesapi.club/tv/${tmdbId}/${season}/${episode}`
-      : `https://moviesapi.club/movie/${tmdbId}?overlay=true`,
+      ? `https://vidfast.pro/tv/${tmdbId}/${season}/${episode}?autoPlay=true&title=true&poster=true&theme=16A085&nextButton=true&autoNext=true`
+      : `https://vidfast.pro/movie/${tmdbId}?autoPlay=true`,
   quality: 'HD',
 },
 server3: {
@@ -192,20 +203,26 @@ server3: {
       name: 'server4',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
-          : `https://vidsrc.me/embed/movie/${tmdbId}`,
+          ? `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
+          : `https://player.vidzee.wtf/embed/movie/${tmdbId}`,
       quality: 'HD+',
     },
-      server5: {
+    server5: {
       name: 'server5',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
-          : `https://www.2embed.cc/embed/${tmdbId}`,
-      quality: 'HD',
+          ? `https://vidrock.net/embed/tv/${id}/${season}/${episode}`
+          : `https://vidrock.net/embed/movie/${tmdbId}`,
+      quality: 'HD+',
     },
-
-
+    serve6: {
+      name: 'server6',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://player.smashy.stream/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://player.smashy.stream/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
   };
 
   const getCurrentStreamUrl = () => {
@@ -251,6 +268,35 @@ const addToHistory = (progress?: number) => {
       setStreamUrl(null);
     }
   }, [selectedServer, selectedSeason, selectedEpisode, id, mediaType, showPlayer]);
+
+  // *** ADDED THIS USEEFFECT ***
+  // Listen for messages from Vidfast player
+  useEffect(() => {
+    const handlePlayerMessage = ({ origin, data }: MessageEvent) => {
+        // Check if the message is from a valid Vidfast origin
+        if (!vidfastOrigins.includes(origin) || !data) {
+            return;
+        }
+    
+        // Check if it's a player event
+        if (data.type === 'PLAYER_EVENT') {
+            const { event, currentTime, duration } = data.data;
+    
+            // Log the event as requested
+            console.log(`Player ${event} at ${currentTime}s of ${duration}s`);
+
+        }
+    };
+
+    // Add the event listener
+    window.addEventListener('message', handlePlayerMessage);
+
+    // Return a cleanup function to remove the listener on unmount
+    return () => {
+        window.removeEventListener('message', handlePlayerMessage);
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount and unmount
+  // *** END OF ADDED USEEFFECT ***
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}&type=${mediaType}`);
