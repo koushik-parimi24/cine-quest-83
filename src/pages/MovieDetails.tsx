@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { tmdb, getBackdropUrl, getImageUrl } from '@/lib/tmdb';
+import { tmdb, getBackdropUrl, getImageUrl,fetchAnimeIdsFromTmdb } from '@/lib/tmdb';
 import { MovieDetails as MovieDetailsType, Credits, Video, Review, MediaType } from '@/types/movie';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/Navbar';
@@ -35,7 +35,8 @@ const MovieDetails = () => {
   const [similar, setSimilar] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, watchlist, add, remove } = useWatchlist();
-  
+  const [anilistId, setAnilistId] = useState<number | null>(null);
+  const [malId, setMalId] = useState<number | null>(null);
   const isInWatchLater = useMemo(
     () => watchlist.some(item => item.media_id === parseInt(id!)),
     [watchlist, id]
@@ -53,15 +54,21 @@ const MovieDetails = () => {
     }
   }, [id, mediaType]);
 
-  const loadDetails = async () => {
+const loadDetails = async () => {
     setLoading(true);
     try {
+      const tmdbId = parseInt(id!);
+      
+      // Reset anime IDs on new load
+      setAnilistId(null);
+      setMalId(null);
+
       const [detailsRes, creditsRes, videosRes, reviewsRes, similarRes] = await Promise.all([
-        tmdb.getDetails(parseInt(id!), mediaType),
-        tmdb.getCredits(parseInt(id!), mediaType),
-        tmdb.getVideos(parseInt(id!), mediaType),
-        tmdb.getReviews(parseInt(id!), mediaType),
-        tmdb.getSimilar(parseInt(id!), mediaType),
+        tmdb.getDetails(tmdbId, mediaType),
+        tmdb.getCredits(tmdbId, mediaType),
+        tmdb.getVideos(tmdbId, mediaType),
+        tmdb.getReviews(tmdbId, mediaType),
+        tmdb.getSimilar(tmdbId, mediaType),
       ]);
 
       setDetails(detailsRes);
@@ -70,6 +77,20 @@ const MovieDetails = () => {
       setReviews(reviewsRes.results || []);
       setSimilar(similarRes.results || []);
       
+      // --- ADD THIS SECTION ---
+      // After fetching details, try to fetch anime IDs
+      try {
+        const animeIds = await fetchAnimeIdsFromTmdb(tmdbId, mediaType);
+        if (animeIds) {
+          console.log('Fetched Anime IDs:', animeIds);
+          setAnilistId(animeIds.anilistId);
+          setMalId(animeIds.malId);
+        }
+      } catch (animeError) {
+        console.warn('Could not fetch anime IDs:', animeError);
+      }
+      // --- END OF ADDED SECTION ---
+
       // Set initial season for TV shows
       if (mediaType === 'tv' && detailsRes?.seasons?.length) {
         const firstRealSeason = detailsRes.seasons.find((s: any) => s.season_number > 0);
@@ -164,12 +185,29 @@ const MovieDetails = () => {
   };
 
   const streamingServers = {
-    server1: {
+server1: {
       name: 'server1',
-      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
-        mediaType === 'tv'
-          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
-          : `https://vidlink.pro/movie/${tmdbId}`,
+      url: (
+        tmdbId: string, 
+        mediaType: string, 
+        season?: number, 
+        episode?: number, 
+        anilist_id?: string, 
+        mal_id?: string
+      ) => {
+        // PRIORITY 1: ANIME (using MAL ID)
+        if (mal_id) {
+          const episodeNumber = mediaType === 'tv' ? episode : 1;
+          const subOrDub = 'sub'; // You can change this to 'dub' if needed
+          return `https://vidlink.pro/anime/${mal_id}/${episodeNumber}/${subOrDub}`;
+        }
+        // PRIORITY 2: TV Show
+        if (mediaType === 'tv') {
+          return `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`;
+        }
+        // PRIORITY 3: Movie
+        return `https://vidlink.pro/movie/${tmdbId}`;
+      },
       quality: 'HD',
     },
     server2: {
@@ -181,24 +219,29 @@ const MovieDetails = () => {
   quality: 'HD',
 },
 server3: {
-  name: 'server3',
-  url: (
-    tmdbId: string,
-    mediaType: string,
-    season?: number,
-    episode?: number,
-    anilist_id?: string
-  ) => {
-    if (mediaType === 'tv') {
-      return `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`;
-    } else if (mediaType === 'anime' && anilist_id) {
-      return `https://player.videasy.net/anime/${anilist_id}/episode?dub=true`;
-    } else {
-      return `https://player.videasy.net/movie/${tmdbId}?overlay=true`;
-    }
-  },
-  quality: 'HD',
-},
+      name: 'server3',
+      url: (
+        tmdbId: string,
+        mediaType: string,
+        season?: number,
+        episode?: number,
+        anilist_id?: string,
+        mal_id?: string
+      ) => {
+        if (mediaType === 'tv') {
+          return `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`;
+        } 
+        // Use anilist_id for anime movies, as per your original file
+        else if (mediaType === 'movie' && anilist_id) {
+          return `https://player.videasy.net/anime/${anilist_id}/episode?dub=true`;
+        } 
+        // Fallback for regular movies
+        else {
+          return `https://player.videasy.net/movie/${tmdbId}?overlay=true`;
+        }
+      },
+      quality: 'HD',
+    },
     server4: {
       name: 'server4',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
@@ -215,7 +258,7 @@ server3: {
           : `https://vidrock.net/embed/movie/${tmdbId}`,
       quality: 'HD+',
     },
-    serve6: {
+    server6: {
       name: 'server6',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
@@ -223,13 +266,60 @@ server3: {
           : `https://player.smashy.stream/movie/${tmdbId}`,
       quality: 'HD+',
     },
+    server7: {
+      name: 'server7',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://111movies.com/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://111movies.com/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server8: {
+      name: 'server8',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://www.2embed.cc//embedtv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://www.2embed.cc//embed/${tmdbId}`,
+      quality: 'HD+',
+    },
+        server9: {
+      name: 'server9',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://moviesapi.club/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://moviesapi.club/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+        server10: {
+      name: 'server10',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://player.autoembed.cc/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://player.autoembed.cc/embed/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+        server11: {
+      name: 'server11',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://www.primewire.tf/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://www.primewire.tf/embed/movie?tmdb=${tmdbId}`,
+      quality: 'HD+',
+    },
   };
 
-  const getCurrentStreamUrl = () => {
+const getCurrentStreamUrl = () => {
     const server = streamingServers[selectedServer as keyof typeof streamingServers];
-    return server.url(id!, mediaType, selectedSeason, selectedEpisode);
+    // Pass both anilistId and malId as strings
+    return server.url(
+      id!, 
+      mediaType, 
+      selectedSeason, 
+      selectedEpisode, 
+      anilistId?.toString(), 
+      malId?.toString()
+    );
   };
-
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
 
 const addToHistory = (progress?: number) => {
@@ -316,6 +406,32 @@ const addToHistory = (progress?: number) => {
   const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube');
   const director = credits?.crew.find(c => c.job === 'Director');
   const producers = credits?.crew.filter(c => c.job === 'Producer').slice(0, 3) || [];
+const handleNextEpisode = () => {
+  if (!details || mediaType !== "tv") return;
+
+  const season = selectedSeason;
+  const episode = selectedEpisode;
+
+  const currentSeason = details.seasons.find(s => s.season_number === season);
+  if (!currentSeason) return;
+
+  // If next episode exists → go to next episode
+  if (episode < currentSeason.episode_count) {
+    setSelectedEpisode(episode + 1);
+    try { addToHistory(); } catch {}
+    return;
+  }
+
+  // If episode ends → go to next season automatically
+  const seasonIndex = details.seasons.findIndex(s => s.season_number === season);
+  const nextSeason = details.seasons[seasonIndex + 1];
+
+  if (nextSeason && nextSeason.season_number > 0) {
+    setSelectedSeason(nextSeason.season_number);
+    setSelectedEpisode(1);
+    try { addToHistory(); } catch {}
+  }
+};
 
   return (
     <div className="min-h-screen bg-background">
@@ -528,41 +644,12 @@ const addToHistory = (progress?: number) => {
                     </select>
                   </div>
                 </div>
+              
                 
-                <Button
-                  onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  size="lg"
-                >
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                  Open Selected Episode
-                </Button>
               </div>
             )}
 
-            {/* For Movies - Direct Open Button */}
-            {mediaType === 'movie' && (
-              <div className="p-6">
-                <div className="space-y-3">
-                  <Button
-                    onClick={() => { try { addToHistory(); } catch {} setShowPlayer(true); }}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                    size="lg"
-                  >
-                    <Play className="mr-2 h-5 w-5 fill-current" />
-                    Play Inline
-                  </Button>
-
-                  <Button
-                    onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}
-                    className="w-full bg-secondary text-foreground hover:bg-secondary/90"
-                    size="sm"
-                  >
-                    Open in {streamingServers[selectedServer as keyof typeof streamingServers].name}
-                  </Button>
-                </div>
-              </div>
-            )}
+            
           </div>
         </div>
       )}
@@ -573,8 +660,19 @@ const addToHistory = (progress?: number) => {
           <div className="bg-card rounded-lg border border-border overflow-hidden p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Player</h3>
+              
               <div className="flex items-center gap-2">
-                <Button size="sm" onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}>Open in new tab</Button>
+{mediaType === "tv" && (
+  <div className="flex justify-end ">
+    <Button
+      size="sm"
+      className="bg-primary text-white hover:bg-primary/80"
+      onClick={handleNextEpisode}
+    >
+      Next Episode →
+    </Button>
+  </div>
+)}
                 <Button size="sm" variant="outline" onClick={() => setShowPlayer(false)}>Close</Button>
               </div>
             </div>
