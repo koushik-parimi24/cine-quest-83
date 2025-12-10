@@ -214,8 +214,8 @@ server1: {
   name: 'server 2',
   url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
     mediaType === 'tv'
-      ? `https://vidfast.pro/tv/${tmdbId}/${season}/${episode}?autoPlay=true&title=true&poster=true&theme=16A085&nextButton=true&autoNext=true`
-      : `https://vidfast.pro/movie/${tmdbId}?autoPlay=true`,
+      ? `https://vidfast.pro/tv/${tmdbId}/${season}/${episode}`
+      : `https://vidfast.pro/movie/${tmdbId}`,
   quality: 'HD',
 },
 server3: {
