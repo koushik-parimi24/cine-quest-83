@@ -371,9 +371,6 @@ const addToHistory = (progress?: number) => {
         // Check if it's a player event
         if (data.type === 'PLAYER_EVENT') {
             const { event, currentTime, duration } = data.data;
-    
-            // Log the event as requested
-            console.log(`Player ${event} at ${currentTime}s of ${duration}s`);
 
         }
     };
