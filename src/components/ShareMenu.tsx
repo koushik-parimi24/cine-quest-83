@@ -1,7 +1,4 @@
-
-
 import { Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface ShareButtonProps {
@@ -17,7 +14,6 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   mediaType,
   id,
 }) => {
-  
   const currentUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/${mediaType}/${id}`
@@ -48,13 +44,11 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   };
 
   return (
-    <Button
-      variant="link"
+    <button
       onClick={handleShare}
-      className="bg-white text-black hover:bg-blue-500 hover:text-white transition-all hover:scale-105 rounded-full"
+      className="p-2 sm:p-3 bg-muted text-foreground border-2 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all duration-100"
     >
-      <Share2 className=" h-4 w-4 sm:h-5 sm:w-5" />
-    
-    </Button>
+      <Share2 className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
+    </button>
   );
 };

@@ -4,7 +4,8 @@ import { tmdb } from '@/lib/tmdb';
 import { Movie, MediaType } from '@/types/movie';
 import { Navbar } from '@/components/Navbar';
 import { MovieCard } from '@/components/MovieCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -41,29 +42,63 @@ const SearchResults = () => {
       <Navbar onSearch={handleSearch} />
 
       <div className="container mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-32 pb-12">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-          Search Results for "{query}"
-        </h1>
-        <p className="text-muted-foreground mb-6 sm:mb-8 text-sm sm:text-base">
-          {results.length} {results.length === 1 ? 'result' : 'results'} found
-        </p>
+        {/* Header - Brutalist */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-3 sm:gap-4 mb-2">
+            <div className="p-2 bg-secondary text-secondary-foreground border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
+            </div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tight">
+              RESULTS FOR "{query.toUpperCase()}"
+            </h1>
+          </div>
+          <p className="text-muted-foreground mb-6 sm:mb-8 text-xs sm:text-sm font-bold uppercase">
+            {results.length} {results.length === 1 ? 'RESULT' : 'RESULTS'} FOUND
+          </p>
+        </motion.div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <div className="p-4 bg-primary border-3 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]" style={{ borderWidth: '3px' }}>
+              <Loader2 className="h-8 w-8 animate-spin text-primary-foreground" />
+            </div>
           </div>
         ) : results.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            {results.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} mediaType={type} />
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 md:gap-6 pt-4 pb-8"
+          >
+            {results.map((movie, index) => (
+              <motion.div
+                key={movie.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(index * 0.03, 0.3) }}
+              >
+                <MovieCard movie={movie} mediaType={type} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-lg sm:text-xl text-muted-foreground">
-              No results found. Try a different search term.
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <div className="inline-block p-4 bg-muted border-3 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] mb-6" style={{ borderWidth: '3px' }}>
+              <Search className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" strokeWidth={1.5} />
+            </div>
+            <p className="text-lg sm:text-xl font-black uppercase text-muted-foreground">
+              NO RESULTS FOUND
             </p>
-          </div>
+            <p className="text-sm text-muted-foreground uppercase mt-2">
+              TRY A DIFFERENT SEARCH TERM
+            </p>
+          </motion.div>
         )}
       </div>
     </div>
