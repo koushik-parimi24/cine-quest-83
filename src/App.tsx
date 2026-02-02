@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MonetagScripts from "./components/MonetagScripts";
 import Home from "./pages/Home";
 import MovieDetails from "./pages/MovieDetails";
 import SearchResults from "./pages/SearchResults";
@@ -18,7 +17,6 @@ const App = () => (
       <Sonner position="top-right" richColors />
       <Toaster />
       <BrowserRouter>
-        <MonetagScripts />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/:type/:id" element={<MovieDetails />} />

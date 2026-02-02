@@ -116,3 +116,53 @@ export const getImageUrl = (path: string | null, size: 'w200' | 'w500' | 'origin
 export const getBackdropUrl = (path: string | null) => {
   return getImageUrl(path, 'original');
 };
+
+/**
+ * Fetches Anilist and MAL IDs using a TMDB ID.
+ * @param tmdbId The TMDB ID of the movie or TV show.
+ * @param mediaType 'movie' or 'tv'.
+ * @returns { id: number, idMal: number } | null
+ */
+export async function fetchAnimeIdsFromTmdb(tmdbId: number, mediaType: 'movie' | 'tv') {
+  const anilistType = mediaType === 'movie' ? 'MOVIE' : 'TV';
+
+  const query = `
+    query ($tmdbId: Int, $type: MediaType) {
+      Media (tmdbId: $tmdbId, type: $type) {
+        id      # This is the Anilist ID
+        idMal   # This is the MyAnimeList (MAL) ID
+        title {
+          romaji
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    tmdbId: tmdbId,
+    type: anilistType,
+  };
+
+  const response = await fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      query: query,
+      variables: variables,
+    }),
+  });
+
+  const { data } = await response.json();
+  
+  if (data && data.Media) {
+    return {
+      anilistId: data.Media.id,
+      malId: data.Media.idMal,
+    };
+  }
+  
+  return null;
+}

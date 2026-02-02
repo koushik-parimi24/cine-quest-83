@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { tmdb, getBackdropUrl, getImageUrl } from '@/lib/tmdb';
+import { tmdb, getBackdropUrl, getImageUrl, fetchAnimeIdsFromTmdb } from '@/lib/tmdb';
 import { MovieDetails as MovieDetailsType, Credits, Video, Review, MediaType } from '@/types/movie';
 import { Navbar } from '@/components/Navbar';
 import { MovieRow } from '@/components/MovieRow';
@@ -13,6 +13,17 @@ import { supabase } from '@/lib/supabaseClient';
 import { ShareButton } from "../components/ShareMenu";
 import { motion } from 'framer-motion';
 
+// Define the Vidfast origins for player messaging
+const vidfastOrigins = [
+  'https://vidfast.pro',
+  'https://vidfast.in',
+  'https://vidfast.io',
+  'https://vidfast.me',
+  'https://vidfast.net',
+  'https://vidfast.pm',
+  'https://vidfast.xyz'
+];
+
 const MovieDetails = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
@@ -24,7 +35,8 @@ const MovieDetails = () => {
   const [similar, setSimilar] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, watchlist, add, remove } = useWatchlist();
-  
+  const [anilistId, setAnilistId] = useState<number | null>(null);
+  const [malId, setMalId] = useState<number | null>(null);
   const isInWatchLater = useMemo(
     () => watchlist.some(item => item.media_id === parseInt(id!)),
     [watchlist, id]
@@ -45,12 +57,18 @@ const MovieDetails = () => {
   const loadDetails = async () => {
     setLoading(true);
     try {
+      const tmdbId = parseInt(id!);
+      
+      // Reset anime IDs on new load
+      setAnilistId(null);
+      setMalId(null);
+
       const [detailsRes, creditsRes, videosRes, reviewsRes, similarRes] = await Promise.all([
-        tmdb.getDetails(parseInt(id!), mediaType),
-        tmdb.getCredits(parseInt(id!), mediaType),
-        tmdb.getVideos(parseInt(id!), mediaType),
-        tmdb.getReviews(parseInt(id!), mediaType),
-        tmdb.getSimilar(parseInt(id!), mediaType),
+        tmdb.getDetails(tmdbId, mediaType),
+        tmdb.getCredits(tmdbId, mediaType),
+        tmdb.getVideos(tmdbId, mediaType),
+        tmdb.getReviews(tmdbId, mediaType),
+        tmdb.getSimilar(tmdbId, mediaType),
       ]);
 
       setDetails(detailsRes);
@@ -59,6 +77,19 @@ const MovieDetails = () => {
       setReviews(reviewsRes.results || []);
       setSimilar(similarRes.results || []);
       
+      // After fetching details, try to fetch anime IDs
+      try {
+        const animeIds = await fetchAnimeIdsFromTmdb(tmdbId, mediaType);
+        if (animeIds) {
+          console.log('Fetched Anime IDs:', animeIds);
+          setAnilistId(animeIds.anilistId);
+          setMalId(animeIds.malId);
+        }
+      } catch (animeError) {
+        console.warn('Could not fetch anime IDs:', animeError);
+      }
+
+      // Set initial season for TV shows
       if (mediaType === 'tv' && detailsRes?.seasons?.length) {
         const firstRealSeason = detailsRes.seasons.find((s: any) => s.season_number > 0);
         if (firstRealSeason) {
@@ -149,49 +180,133 @@ const MovieDetails = () => {
   const streamingServers = {
     server1: {
       name: 'SERVER 1',
-      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
-        mediaType === 'tv'
-          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
-          : `https://vidlink.pro/movie/${tmdbId}`,
+      url: (
+        tmdbId: string, 
+        mediaType: string, 
+        season?: number, 
+        episode?: number, 
+        anilist_id?: string, 
+        mal_id?: string
+      ) => {
+        // PRIORITY 1: ANIME (using MAL ID)
+        if (mal_id) {
+          const episodeNumber = mediaType === 'tv' ? episode : 1;
+          const subOrDub = 'sub';
+          return `https://vidlink.pro/anime/${mal_id}/${episodeNumber}/${subOrDub}`;
+        }
+        // PRIORITY 2: TV Show
+        if (mediaType === 'tv') {
+          return `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`;
+        }
+        // PRIORITY 3: Movie
+        return `https://vidlink.pro/movie/${tmdbId}`;
+      },
       quality: 'HD',
     },
     server2: {
       name: 'SERVER 2',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://moviesapi.club/tv/${tmdbId}/${season}/${episode}`
-          : `https://moviesapi.club/movie/${tmdbId}?overlay=true`,
+          ? `https://vidfast.pro/tv/${tmdbId}/${season}/${episode}`
+          : `https://vidfast.pro/movie/${tmdbId}`,
       quality: 'HD',
     },
     server3: {
       name: 'SERVER 3',
-      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
-        mediaType === 'tv'
-          ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
-          : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
+      url: (
+        tmdbId: string,
+        mediaType: string,
+        season?: number,
+        episode?: number,
+        anilist_id?: string,
+        mal_id?: string
+      ) => {
+        if (mediaType === 'tv') {
+          return `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`;
+        } else if (mediaType === 'movie' && anilist_id) {
+          return `https://player.videasy.net/anime/${anilist_id}/episode?dub=true`;
+        } else {
+          return `https://player.videasy.net/movie/${tmdbId}?overlay=true`;
+        }
+      },
       quality: 'HD',
     },
     server4: {
       name: 'SERVER 4',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
-          : `https://vidsrc.me/embed/movie/${tmdbId}`,
+          ? `https://player.vidzee.wtf/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://player.vidzee.wtf/embed/movie/${tmdbId}`,
       quality: 'HD+',
     },
     server5: {
       name: 'SERVER 5',
       url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
         mediaType === 'tv'
-          ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
-          : `https://www.2embed.cc/embed/${tmdbId}`,
-      quality: 'HD',
+          ? `https://vidrock.net/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://vidrock.net/embed/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server6: {
+      name: 'SERVER 6',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://player.smashy.stream/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://player.smashy.stream/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server7: {
+      name: 'SERVER 7',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://111movies.com/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://111movies.com/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server8: {
+      name: 'SERVER 8',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://www.2embed.cc//embedtv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://www.2embed.cc//embed/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server9: {
+      name: 'SERVER 9',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://moviesapi.club/tv/${tmdbId}?s=${season}&e=${episode}`
+          : `https://moviesapi.club/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server10: {
+      name: 'SERVER 10',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://player.autoembed.cc/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://player.autoembed.cc/embed/movie/${tmdbId}`,
+      quality: 'HD+',
+    },
+    server11: {
+      name: 'SERVER 11',
+      url: (tmdbId: string, mediaType: string, season?: number, episode?: number) =>
+        mediaType === 'tv'
+          ? `https://www.primewire.tf/embed/tv/${tmdbId}/${season}/${episode}`
+          : `https://www.primewire.tf/embed/movie?tmdb=${tmdbId}`,
+      quality: 'HD+',
     },
   };
 
   const getCurrentStreamUrl = () => {
     const server = streamingServers[selectedServer as keyof typeof streamingServers];
-    return server.url(id!, mediaType, selectedSeason, selectedEpisode);
+    return server.url(
+      id!, 
+      mediaType, 
+      selectedSeason, 
+      selectedEpisode, 
+      anilistId?.toString(), 
+      malId?.toString()
+    );
   };
 
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
@@ -221,8 +336,52 @@ const MovieDetails = () => {
     }
   }, [selectedServer, selectedSeason, selectedEpisode, id, mediaType, showPlayer]);
 
+  // Listen for messages from Vidfast player
+  useEffect(() => {
+    const handlePlayerMessage = ({ origin, data }: MessageEvent) => {
+      if (!vidfastOrigins.includes(origin) || !data) {
+        return;
+      }
+      if (data.type === 'PLAYER_EVENT') {
+        const { event, currentTime, duration } = data.data;
+        // Handle player events if needed
+      }
+    };
+    window.addEventListener('message', handlePlayerMessage);
+    return () => {
+      window.removeEventListener('message', handlePlayerMessage);
+    };
+  }, []);
+
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}&type=${mediaType}`);
+  };
+
+  const handleNextEpisode = () => {
+    if (!details || mediaType !== "tv") return;
+
+    const season = selectedSeason;
+    const episode = selectedEpisode;
+
+    const currentSeason = details.seasons.find(s => s.season_number === season);
+    if (!currentSeason) return;
+
+    // If next episode exists → go to next episode
+    if (episode < currentSeason.episode_count) {
+      setSelectedEpisode(episode + 1);
+      try { addToHistory(); } catch {}
+      return;
+    }
+
+    // If episode ends → go to next season automatically
+    const seasonIndex = details.seasons.findIndex(s => s.season_number === season);
+    const nextSeason = details.seasons[seasonIndex + 1];
+
+    if (nextSeason && nextSeason.season_number > 0) {
+      setSelectedSeason(nextSeason.season_number);
+      setSelectedEpisode(1);
+      try { addToHistory(); } catch {}
+    }
   };
 
   if (loading) {
@@ -487,6 +646,14 @@ const MovieDetails = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-black uppercase">PLAYER</h3>
                 <div className="flex items-center gap-2">
+                  {mediaType === "tv" && (
+                    <button
+                      onClick={handleNextEpisode}
+                      className="px-3 py-2 bg-primary text-primary-foreground text-xs font-black uppercase border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                    >
+                      NEXT EP →
+                    </button>
+                  )}
                   <button 
                     onClick={() => { try { addToHistory(); } catch {} window.open(getCurrentStreamUrl(), '_blank'); }}
                     className="px-3 py-2 bg-secondary text-secondary-foreground text-xs font-black uppercase border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 flex items-center gap-1"

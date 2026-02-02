@@ -40,6 +40,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fetch Supabase user session
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -53,6 +54,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
+  // Handle login/logout
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -76,6 +78,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
     }
   };
 
+  // Fetch search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length < 2) {
@@ -103,6 +106,7 @@ export const Navbar = ({ onSearch }: NavbarProps) => {
     return () => clearTimeout(delay);
   }, [searchQuery]);
 
+  // Hide suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
