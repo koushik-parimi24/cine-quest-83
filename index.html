@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CinemaHub - Discover Movies & TV Shows</title>
@@ -21,7 +20,6 @@
       rel="stylesheet"
     />
 
-
     <meta
       property="og:title"
       content="bingenow - Discover Movies & TV Shows"
@@ -32,11 +30,14 @@
     />
     <meta property="og:type" content="website" />
 
-  </head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RY9FJ4364W"></script>
-  <body>
-    <div id="root"></div>
-</div>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RY9FJ4364W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RY9FJ4364W');
+    </script>
   </head>
   <body>
     <div id="root"></div>
