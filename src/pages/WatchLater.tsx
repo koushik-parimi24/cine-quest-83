@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { MovieCard } from '@/components/MovieCard';
-import { Bookmark, LogIn } from 'lucide-react';
+import { Bookmark, LogIn, Bell, BellOff } from 'lucide-react';
+import { useEmailPreferences } from '@/hooks/useEmailPreferences';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
@@ -9,6 +10,7 @@ import { motion } from 'framer-motion';
 const WatchLater = () => {
   const navigate = useNavigate();
   const { user, watchlist } = useWatchlist();
+  const { preferences, loading: prefLoading, toggleReminder } = useEmailPreferences();
 
   const handleLogin = async () => {
     try {
@@ -26,6 +28,10 @@ const WatchLater = () => {
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}&type=movie`);
+  };
+
+  const handleToggleReminder = async () => {
+    await toggleReminder(!preferences.reminder_enabled);
   };
 
   return (
@@ -46,6 +52,31 @@ const WatchLater = () => {
             MY LIST
           </h1>
           <div className="h-1 w-16 sm:w-24 bg-primary" />
+          
+          {/* Email Reminder Toggle */}
+          {user && !prefLoading && (
+            <button
+              onClick={handleToggleReminder}
+              className={`ml-auto flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase border-2 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all duration-100 ${
+                preferences.reminder_enabled 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-muted text-muted-foreground'
+              }`}
+              title={preferences.reminder_enabled ? 'Email reminders ON' : 'Email reminders OFF'}
+            >
+              {preferences.reminder_enabled ? (
+                <>
+                  <Bell className="h-4 w-4" strokeWidth={2.5} />
+                  <span className="hidden sm:inline">REMINDERS ON</span>
+                </>
+              ) : (
+                <>
+                  <BellOff className="h-4 w-4" strokeWidth={2.5} />
+                  <span className="hidden sm:inline">REMINDERS OFF</span>
+                </>
+              )}
+            </button>
+          )}
         </motion.div>
 
         {!user ? (
