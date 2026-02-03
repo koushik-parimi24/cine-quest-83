@@ -1,86 +1,77 @@
-const API_BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWJiYjQwMTA5ZDBmZDYyYjI3OTY3MGE2MDU4NDA2MyIsIm5iZiI6MTc1MTY5NTcwOC43NzIsInN1YiI6IjY4NjhjMTVjYzhlYzE3NDVhM2NlZGM1OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.t_nlKGADApnBaOxU2sdH8eSQK9JR8qanrBulfD8rUEE';
+import { supabase } from './supabaseClient';
+
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
-const options = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${API_KEY}`
+/**
+ * Calls the TMDB proxy Edge Function
+ */
+const callTmdbProxy = async (endpoint: string, params?: string) => {
+  const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
+    body: { endpoint, params },
+  });
+
+  if (error) {
+    console.error('TMDB Proxy Error:', error);
+    throw error;
   }
+
+  return data;
 };
 
 export const tmdb = {
   // Get trending movies or TV shows
   getTrending: async (mediaType: 'movie' | 'tv' = 'movie', timeWindow: 'day' | 'week' = 'day') => {
-    const response = await fetch(`${API_BASE_URL}/trending/${mediaType}/${timeWindow}`, options);
-    return response.json();
+    return callTmdbProxy(`/trending/${mediaType}/${timeWindow}`);
   },
 
   // Get popular movies or TV shows
   getPopular: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/popular`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/popular`);
   },
 
   // Get top rated movies or TV shows
   getTopRated: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/top_rated`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/top_rated`);
   },
 
   // Get upcoming movies
   getUpcoming: async () => {
-    const response = await fetch(`${API_BASE_URL}/movie/upcoming`, options);
-    return response.json();
+    return callTmdbProxy('/movie/upcoming');
   },
 
   // Search movies or TV shows
   search: async (query: string, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(
-      `${API_BASE_URL}/search/${mediaType}?query=${encodeURIComponent(query)}`,
-      options
-    );
-    return response.json();
+    return callTmdbProxy(`/search/${mediaType}`, `query=${encodeURIComponent(query)}`);
   },
 
   // Search across all types (movies, TV shows)
   searchMulti: async (query: string) => {
-    const response = await fetch(
-      `${API_BASE_URL}/search/multi?query=${encodeURIComponent(query)}`,
-      options
-    );
-    return response.json();
+    return callTmdbProxy('/search/multi', `query=${encodeURIComponent(query)}`);
   },
 
   // Get movie or TV show details
   getDetails: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/${id}`);
   },
 
   // Get credits (cast and crew)
   getCredits: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}/credits`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/${id}/credits`);
   },
 
   // Get videos (trailers, teasers, etc.)
   getVideos: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}/videos`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/${id}/videos`);
   },
 
   // Get similar movies or TV shows
   getSimilar: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}/similar`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/${id}/similar`);
   },
 
   // Get reviews
   getReviews: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/${mediaType}/${id}/reviews`, options);
-    return response.json();
+    return callTmdbProxy(`/${mediaType}/${id}/reviews`);
   },
 
   // Discover movies or TV shows with filters
@@ -96,14 +87,17 @@ export const tmdb = {
         [`${mediaType === 'movie' ? 'primary_release_year' : 'first_air_date_year'}`]: filters.year.toString() 
       }),
     });
-    const response = await fetch(`${API_BASE_URL}/discover/${mediaType}?${params}`, options);
-    return response.json();
+    return callTmdbProxy(`/discover/${mediaType}`, params.toString());
   },
 
   // Get genres
   getGenres: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    const response = await fetch(`${API_BASE_URL}/genre/${mediaType}/list`, options);
-    return response.json();
+    return callTmdbProxy(`/genre/${mediaType}/list`);
+  },
+
+  // Get TV season details (for episodes)
+  getTvSeason: async (tvId: number, seasonNumber: number) => {
+    return callTmdbProxy(`/tv/${tvId}/season/${seasonNumber}`);
   },
 };
 

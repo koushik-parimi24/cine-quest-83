@@ -108,16 +108,7 @@ const MovieDetails = () => {
       const fetchSeasonData = async () => {
         setLoadingSeason(true);
         try {
-          const seasonResponse = await fetch(
-            `https://api.themoviedb.org/3/tv/${id}/season/${selectedSeason}`,
-            {
-              headers: {
-                accept: 'application/json',
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWJiYjQwMTA5ZDBmZDYyYjI3OTY3MGE2MDU4NDA2MyIsIm5iZiI6MTc1MTY5NTcwOC43NzIsInN1YiI6IjY4NjhjMTVjYzhlYzE3NDVhM2NlZGM1OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.t_nlKGADApnBaOxU2sdH8eSQK9JR8qanrBulfD8rUEE'
-              }
-            }
-          );
-          const seasonData = await seasonResponse.json();
+          const seasonData = await tmdb.getTvSeason(parseInt(id), selectedSeason);
           setSeasonData(seasonData);
           setSelectedEpisode(1);
         } catch (error) {
