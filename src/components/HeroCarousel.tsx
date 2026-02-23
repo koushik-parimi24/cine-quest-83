@@ -174,7 +174,7 @@ export const HeroCarousel = ({ movies, mediaType }: HeroCarouselProps) => {
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-end pb-32 sm:pb-40">
-        <div className="container mx-auto px-4 lg:px-8">
+        <div className="container mx-auto px-12 sm:px-4 lg:px-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentMovie.id}
@@ -208,32 +208,32 @@ export const HeroCarousel = ({ movies, mediaType }: HeroCarouselProps) => {
               </p>
 
               {/* Action Buttons - Brutalist */}
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-2 sm:gap-3 pt-2">
                 <button 
-                  className="px-6 sm:px-8 py-3 bg-primary text-primary-foreground font-black text-sm sm:text-base uppercase tracking-wide border-3 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-100 flex items-center gap-2"
-                  style={{ borderWidth: '3px' }}
+                  className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-primary text-primary-foreground font-black text-xs sm:text-sm md:text-base uppercase tracking-wide border-2 sm:border-3 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] sm:hover:translate-x-[4px] sm:hover:translate-y-[4px] transition-all duration-100 flex items-center gap-1.5 sm:gap-2"
+                  style={{ borderWidth: '2px' }}
                   onClick={() => navigate(`/${mediaType}/${currentMovie.id}`)}
                 >
-                  <Play className="h-5 w-5 fill-current" />
+                  <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                   PLAY NOW
                 </button>
                 <button 
-                  className="px-6 sm:px-8 py-3 bg-background text-foreground font-black text-sm sm:text-base uppercase tracking-wide border-3 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-100 flex items-center gap-2"
-                  style={{ borderWidth: '3px' }}
+                  className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-background text-foreground font-black text-xs sm:text-sm md:text-base uppercase tracking-wide border-2 sm:border-3 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] sm:hover:translate-x-[4px] sm:hover:translate-y-[4px] transition-all duration-100 flex items-center gap-1.5 sm:gap-2"
+                  style={{ borderWidth: '2px' }}
                   onClick={() => navigate(`/${mediaType}/${currentMovie.id}`)}
                 >
-                  <Info className="h-5 w-5" />
+                  <Info className="h-4 w-4 sm:h-5 sm:w-5" />
                   MORE INFO
                 </button>
                 <button 
-                  className="p-3 bg-accent text-accent-foreground border-3 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-100"
-                  style={{ borderWidth: '3px' }}
+                  className="p-2 sm:p-3 bg-accent text-accent-foreground border-2 sm:border-3 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))] sm:shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] sm:hover:translate-x-[4px] sm:hover:translate-y-[4px] transition-all duration-100"
+                  style={{ borderWidth: '2px' }}
                   onClick={handleWatchLater}
                 >
                   {isInWatchLater ? (
-                    <Check className="h-5 w-5" strokeWidth={3} />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
                   ) : (
-                    <Plus className="h-5 w-5" strokeWidth={3} />
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
                   )}
                 </button>
               </div>
