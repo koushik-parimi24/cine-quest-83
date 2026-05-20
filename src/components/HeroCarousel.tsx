@@ -124,7 +124,7 @@ export const HeroCarousel = ({ movies, mediaType }: HeroCarouselProps) => {
 
   return (
     <motion.div
-      className="relative h-[68svh] min-h-[480px] sm:min-h-[560px] lg:h-[84vh] w-full overflow-hidden bg-background touch-pan-y"
+      className="relative h-[68svh] min-h-[480px] sm:min-h-[560px] lg:h-[84vh] w-full overflow-hidden touch-pan-y"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       drag="x"
@@ -176,8 +176,7 @@ export const HeroCarousel = ({ movies, mediaType }: HeroCarouselProps) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 40 }}
               transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-              className="hero-panel max-w-3xl space-y-4 border-3 border-foreground p-4 shadow-[6px_6px_0px_hsl(var(--foreground))] sm:space-y-6 sm:p-6 lg:max-w-4xl"
-              style={{ borderWidth: '3px' }}
+              className="max-w-3xl space-y-4 sm:space-y-6 lg:max-w-4xl"
             >
               <h1 className="max-w-[12ch] text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] font-black uppercase leading-[0.9] tracking-tighter text-foreground">
                 {title}

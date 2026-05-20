@@ -124,9 +124,8 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
           }}
         />
 
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/30 to-transparent" />
-        <div className="absolute inset-0 bg-[var(--gradient-hero)]" style={{ animationDelay: '0.2s' }} />
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
       </div>
 
       {/* Content */}
@@ -134,14 +133,14 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-2xl space-y-6 animate-slide-up" style={{ animationDelay: '0.3s', animationDuration: '0.6s' }}>
             {/* Title */}
-            <h1 className="text-2xl font-black leading-tight lg:text-7xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text ">
+            <h1 className="text-2xl font-black leading-tight lg:text-7xl text-white">
               {title}
             </h1>
 
             {/* Meta Info */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-sm text-white/90">
               <span className="flex items-center gap-1">
-                <span className="text-accent font-bold">★</span>
+                <span className="text-yellow-400 font-bold">★</span>
                 {movie.vote_average.toFixed(1)}
               </span>
               <span>•</span>
@@ -151,24 +150,24 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
             </div>
 
             {/* Overview */}
-            <p className="text-sm lg:text-lg leading-relaxed text-foreground/90 line-clamp-3">
+            <p className="text-sm lg:text-lg leading-relaxed text-white/90 line-clamp-3">
               {movie.overview}
             </p>
 
             {/* Action Buttons */}
-            <div className="flex  gap-3 sm:gap-4 pt-4">
+            <div className="flex gap-3 sm:gap-4 pt-4">
               <Button 
                 size="lg"
-                className=" bg-red-700 hover:shadow-[var(--shadow-glow-bright)] font-bold transition-all hover:scale-105 touch-manipulation"
+                className="bg-red-700 hover:bg-red-800 font-bold transition-all hover:scale-105 touch-manipulation"
                 onClick={() => navigate(`/${mediaType}/${movie.id}`)}
               >
                 <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                 Watch Now
               </Button>
-                <Button 
+              <Button 
                 size="lg"
                 variant="outline"
-                className="border-accent/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all hover:scale-105 touch-manipulation"
+                className="border-white/50 bg-black/30 text-white hover:bg-white/20 hover:border-white transition-all hover:scale-105 touch-manipulation backdrop-blur-sm"
                 onClick={handleWatchLater}
               >
                 {isInWatchLater ? (
@@ -178,7 +177,6 @@ export const Hero = ({ movie, mediaType }: HeroProps) => {
                 )}
                 {isInWatchLater ? 'In Watchlist' : 'Watch Later'}
               </Button>
-
             </div>
           </div>
         </div>
