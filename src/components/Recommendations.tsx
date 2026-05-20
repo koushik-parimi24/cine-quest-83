@@ -13,9 +13,9 @@ export const Recommendations = ({ movies, title = 'RECOMMENDED FOR YOU' }: Recom
   return (
     <div className="space-y-4 mb-8">
       {/* Title - Brutalist */}
-      <div className="px-3 sm:px-4 lg:px-8 flex items-center gap-4">
+      <div className="px-3 sm:px-4 lg:px-8 flex flex-wrap items-center gap-x-4 gap-y-2">
         <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight">{title}</h2>
-        <div className="h-1 flex-1 max-w-32 bg-secondary" />
+        <div className="h-1 min-w-12 flex-1 max-w-32 bg-secondary" />
       </div>
 
       {/* Scrollable Row */}
@@ -24,7 +24,7 @@ export const Recommendations = ({ movies, title = 'RECOMMENDED FOR YOU' }: Recom
           {movies.map((movie, index) => (
             <motion.div 
               key={movie.id} 
-              className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+              className="row-card flex-shrink-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 

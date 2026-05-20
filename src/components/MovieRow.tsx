@@ -50,12 +50,12 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
-        className="px-3 sm:px-4 lg:px-8 flex items-center gap-4"
+        className="px-3 sm:px-4 lg:px-8 flex flex-wrap items-center gap-x-4 gap-y-2"
       >
         <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight">
           {title}
         </h2>
-        <div className="h-1 flex-1 max-w-32 bg-primary" />
+        <div className="h-1 min-w-12 flex-1 max-w-32 bg-primary" />
       </motion.div>
 
       {/* Scrollable Container */}
@@ -83,7 +83,7 @@ export const MovieRow = ({ title, movies, mediaType }: MovieRowProps) => {
           {movies.map((movie, index) => (
             <motion.div 
               key={movie.id} 
-              className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+              className="row-card flex-shrink-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 

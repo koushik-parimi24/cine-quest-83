@@ -77,11 +77,11 @@ export const BecauseYouWatched = ({ historyItem }: BecauseYouWatchedProps) => {
           <History className="h-3 w-3" strokeWidth={2.5} />
           BECAUSE YOU WATCHED
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-primary">
             {title}
           </h2>
-          <div className="h-1 flex-1 max-w-24 bg-primary/50" />
+          <div className="h-1 min-w-12 flex-1 max-w-24 bg-primary/50" />
         </div>
       </motion.div>
 
@@ -110,7 +110,7 @@ export const BecauseYouWatched = ({ historyItem }: BecauseYouWatchedProps) => {
           {recommendations.map((movie, index) => (
             <motion.div 
               key={movie.id} 
-              className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+              className="row-card flex-shrink-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 

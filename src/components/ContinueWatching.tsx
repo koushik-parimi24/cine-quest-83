@@ -2,7 +2,7 @@ import { HistoryEntry, watchHistory } from '@/lib/watchHistory';
 import { MovieCard } from './MovieCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ContinueWatchingProps {
@@ -12,6 +12,10 @@ interface ContinueWatchingProps {
 
 export const ContinueWatching = ({ items: initialItems, onUpdate }: ContinueWatchingProps) => {
   const [items, setItems] = useState(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
 
   const handleRemove = (id: number) => {
     watchHistory.remove(id);
@@ -35,8 +39,8 @@ export const ContinueWatching = ({ items: initialItems, onUpdate }: ContinueWatc
   return (
     <div className="space-y-4 mb-8">
       {/* Header - Brutalist */}
-      <div className="flex items-center justify-between px-3 sm:px-4 lg:px-8">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 px-3 sm:px-4 lg:px-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight">
             CONTINUE WATCHING
           </h2>
@@ -44,7 +48,7 @@ export const ContinueWatching = ({ items: initialItems, onUpdate }: ContinueWatc
         </div>
         <button
           onClick={handleClearAll}
-          className="flex items-center gap-2 px-3 py-2 bg-destructive text-destructive-foreground text-xs font-black uppercase border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+          className="flex w-full items-center justify-center gap-2 px-3 py-2 bg-destructive text-destructive-foreground text-xs font-black uppercase border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 sm:w-auto"
         >
           <Trash2 className="h-3 w-3" strokeWidth={2.5} />
           CLEAR
@@ -58,7 +62,7 @@ export const ContinueWatching = ({ items: initialItems, onUpdate }: ContinueWatc
             {items.map((it) => (
               <motion.div
                 key={`${it.mediaType}-${it.id}`}
-                className="relative flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+                className="relative row-card flex-shrink-0"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}

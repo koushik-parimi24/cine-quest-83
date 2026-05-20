@@ -131,12 +131,12 @@ export const TopTenRow = ({ title, movies, mediaType }: TopTenRowProps) => {
   return (
     <div className="space-y-4 mb-8">
       {/* Section Title - Brutalist */}
-      <div className="px-3 sm:px-4 lg:px-8 flex items-center gap-4">
+      <div className="px-3 sm:px-4 lg:px-8 flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="bg-primary text-primary-foreground px-4 py-2 border-3 border-foreground shadow-[3px_3px_0px_hsl(var(--foreground))]" style={{ borderWidth: '3px' }}>
           <span className="text-xl sm:text-2xl font-black uppercase tracking-tight">TOP 10</span>
         </div>
         <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight">{title}</h2>
-        <div className="h-1 flex-1 max-w-32 bg-accent" />
+        <div className="h-1 min-w-12 flex-1 max-w-32 bg-accent" />
       </div>
 
       {/* Scrollable Row */}

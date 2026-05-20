@@ -70,9 +70,9 @@ export const GenreFilter = ({ mediaType, selectedGenre, onGenreSelect }: GenreFi
   }
 
   return (
-    <div className="relative py-4">
+      <div className="relative py-4 sm:py-5">
       {/* Scrollable genre pills - Brutalist */}
-      <div className="flex gap-2 sm:gap-3 overflow-x-scroll scrollbar-hide px-3 sm:px-4 lg:px-8">
+      <div className="flex gap-2 sm:gap-3 overflow-x-scroll md:flex-wrap md:overflow-visible scrollbar-hide px-3 sm:px-4 lg:px-8">
         {/* All button */}
         <motion.button
           whileTap={{ scale: 0.95 }}

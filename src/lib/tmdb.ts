@@ -1,77 +1,108 @@
 import { supabase } from './supabaseClient';
 
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 /**
- * Calls the TMDB proxy Edge Function
+ * Calls TMDB directly or falls back to Supabase proxy if needed
  */
-const callTmdbProxy = async (endpoint: string, params?: string) => {
-  const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
-    body: { endpoint, params },
-  });
+const callTmdbApi = async (endpoint: string, params?: string) => {
+  // Try direct API call first
+  try {
+    if (!TMDB_API_KEY) {
+      throw new Error('TMDB API key not configured');
+    }
 
-  if (error) {
-    console.error('TMDB Proxy Error:', error);
-    throw error;
+    const queryParams = new URLSearchParams({
+      api_key: TMDB_API_KEY,
+      ...(params && Object.fromEntries(new URLSearchParams(params))),
+    });
+
+    const url = `${TMDB_BASE_URL}${endpoint}?${queryParams.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`TMDB API returned ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (directError) {
+    console.warn('Direct TMDB API call failed, trying Supabase proxy:', directError);
+
+    // Fallback to Supabase proxy
+    try {
+      const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
+        body: { endpoint, params },
+      });
+
+      if (error) {
+        console.error('TMDB Proxy Error:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (proxyError) {
+      console.error('Both TMDB API and proxy failed:', proxyError);
+      throw proxyError;
+    }
   }
-
-  return data;
 };
 
 export const tmdb = {
   // Get trending movies or TV shows
   getTrending: async (mediaType: 'movie' | 'tv' = 'movie', timeWindow: 'day' | 'week' = 'day') => {
-    return callTmdbProxy(`/trending/${mediaType}/${timeWindow}`);
+    return callTmdbApi(`/trending/${mediaType}/${timeWindow}`);
   },
 
   // Get popular movies or TV shows
   getPopular: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/popular`);
+    return callTmdbApi(`/${mediaType}/popular`);
   },
 
   // Get top rated movies or TV shows
   getTopRated: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/top_rated`);
+    return callTmdbApi(`/${mediaType}/top_rated`);
   },
 
   // Get upcoming movies
   getUpcoming: async () => {
-    return callTmdbProxy('/movie/upcoming');
+    return callTmdbApi('/movie/upcoming');
   },
 
   // Search movies or TV shows
   search: async (query: string, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/search/${mediaType}`, `query=${encodeURIComponent(query)}`);
+    return callTmdbApi(`/search/${mediaType}`, `query=${encodeURIComponent(query)}`);
   },
 
   // Search across all types (movies, TV shows)
   searchMulti: async (query: string) => {
-    return callTmdbProxy('/search/multi', `query=${encodeURIComponent(query)}`);
+    return callTmdbApi('/search/multi', `query=${encodeURIComponent(query)}`);
   },
 
   // Get movie or TV show details
   getDetails: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/${id}`);
+    return callTmdbApi(`/${mediaType}/${id}`);
   },
 
   // Get credits (cast and crew)
   getCredits: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/${id}/credits`);
+    return callTmdbApi(`/${mediaType}/${id}/credits`);
   },
 
   // Get videos (trailers, teasers, etc.)
   getVideos: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/${id}/videos`);
+    return callTmdbApi(`/${mediaType}/${id}/videos`);
   },
 
   // Get similar movies or TV shows
   getSimilar: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/${id}/similar`);
+    return callTmdbApi(`/${mediaType}/${id}/similar`);
   },
 
   // Get reviews
   getReviews: async (id: number, mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/${mediaType}/${id}/reviews`);
+    return callTmdbApi(`/${mediaType}/${id}/reviews`);
   },
 
   // Discover movies or TV shows with filters
@@ -87,17 +118,17 @@ export const tmdb = {
         [`${mediaType === 'movie' ? 'primary_release_year' : 'first_air_date_year'}`]: filters.year.toString() 
       }),
     });
-    return callTmdbProxy(`/discover/${mediaType}`, params.toString());
+    return callTmdbApi(`/discover/${mediaType}`, params.toString());
   },
 
   // Get genres
   getGenres: async (mediaType: 'movie' | 'tv' = 'movie') => {
-    return callTmdbProxy(`/genre/${mediaType}/list`);
+    return callTmdbApi(`/genre/${mediaType}/list`);
   },
 
   // Get TV season details (for episodes)
   getTvSeason: async (tvId: number, seasonNumber: number) => {
-    return callTmdbProxy(`/tv/${tvId}/season/${seasonNumber}`);
+    return callTmdbApi(`/tv/${tvId}/season/${seasonNumber}`);
   },
 };
 

@@ -114,7 +114,7 @@ export const ComingSoon = ({ movies, mediaType }: ComingSoonProps) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
-        className="px-3 sm:px-4 lg:px-8 flex items-center gap-4"
+        className="px-3 sm:px-4 lg:px-8 flex flex-wrap items-center gap-x-4 gap-y-2"
       >
         <div className="flex items-center gap-2">
           <div className="p-2 bg-accent text-accent-foreground border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">
@@ -124,7 +124,7 @@ export const ComingSoon = ({ movies, mediaType }: ComingSoonProps) => {
             COMING SOON
           </h2>
         </div>
-        <div className="h-1 flex-1 max-w-32 bg-accent" />
+        <div className="h-1 min-w-12 flex-1 max-w-32 bg-accent" />
       </motion.div>
 
       {/* Scrollable Container */}
@@ -157,7 +157,7 @@ export const ComingSoon = ({ movies, mediaType }: ComingSoonProps) => {
             return (
               <motion.div 
                 key={movie.id} 
-                className="flex-shrink-0 w-[200px] sm:w-[220px] md:w-[240px] lg:w-[280px]"
+                className="wide-row-card flex-shrink-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
